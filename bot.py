@@ -3,20 +3,22 @@ import discord
 import google.generativeai as gemini
 
 
-gemini.configure(api_key="AIzaSyBShrIVy_UqwUpWZeIiMirTY5sGSs9HbgI")
+gemini.configure(api_key="AIzaSyDdB4r1woGU-Q9DWhAGukc2GVF8S8M6K2o")
 model = gemini.GenerativeModel("gemini-1.5-flash")
 
+
+#Role mapping name(str) -> role id(int)
 r = {
-    "18-20": 123456789012345678,  # Replace with actual role IDs
-    "21-25": 234567890123456789,
-    "25-30":
-    "30-35":
-    ">35":
-    "he/him": 234567890123456789,
-    "she/her": 234567890123456789,
-    "they/them": 234567890123456789
-    "work":
-    "college":
+    "18-20": 1316707496974618644,  
+    "21-25": 1316707726780534795,
+    "25-30":1316707851363684354,
+    "30-35":1316707965990080522,
+    ">35":1316708075603759114,
+    "he/him": 1316708175860338708,
+    "she/her": 1316708329208156191,
+    "they/them": 234567890123456789,
+    "work":1316708586344284211,
+    "college":1316708465602990100
     # Add more roles as needed
 }
 
@@ -41,6 +43,9 @@ def get_roles(intro):
             role.append(r[i.lower().strip()])
     except:
         return role
+
+    return role
+
 
 
 #setting up the client class
@@ -69,6 +74,12 @@ class Client(discord.Client):
 
         #All Introduction based commands
         if message.channel.id == 1316681600808915016:
+            if message.content.startswith("!intro"):
+                intro_role_lst = get_roles(message.content)
+                for role_id in intro_role_lst:
+                    role = discord.utils.get(message.guild.roles, id=role_id)
+                    if role:
+                        await message.author.add_roles(role)
 
 
 
@@ -97,8 +108,8 @@ class Client(discord.Client):
 
 
 # Set up bot prefix and intents
-intents = discord.Intents.default()             # Default intents
-intents.message_content = True                         # Enable message intents if needed
+intents = discord.Intents.default()         # Default intents
+intents.message_content = True              # Enable message intents if needed
 intents.members = True
 
 # Run the bot
