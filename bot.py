@@ -244,7 +244,7 @@ intents.message_content = True              # Enable message intents if needed
 intents.members = True
 
 # Run the bot
-TOKEN = "MTMxNjQwNjg3NzU5MjIyMzc1NQ.Gk5c2F.mKf8K8kLrpkUHfMl_39DoIsbLnYoLe4lyKYB3g"
+TOKEN = ""
 client = Client(intents = intents)
 client.run(TOKEN)
 
