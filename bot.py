@@ -4,10 +4,13 @@ from collections import deque
 import subprocess
 import json
 
-gemini.configure(api_key="AIzaSyDdB4r1woGU-Q9DWhAGukc2GVF8S8M6K2o")
+gemini.configure(api_key="ENTER YOUR API KEY")
 model = gemini.GenerativeModel("gemini-2.0-flash-exp")
 
 # Role mapping name(str) -> role id(int)
+#example role mapping with role to role id maping
+
+#TODO make a simple class and input for this
 r = {
     "18-20": 1316707496974618644,
     "21-25": 1316707726780534795,
@@ -22,6 +25,7 @@ r = {
     # Add more roles as needed
 }
 
+#location of server and its config files
 SERVER_DIRECTORY = "/home/mcserver/minecraft_bedrock"
 SERVER_PROPERTIES = f"{SERVER_DIRECTORY}/server.properties"
 
