@@ -1,28 +1,44 @@
-# Jule - Discord Bot with Gemini Integration
+# Jule — Discord-driven dynamic subdomain sites
 
-Jule is a Discord bot integrated with Gemini's generative AI (gemini-2.0-flash-exp) to provide helpful and dynamic interactions. It also includes features for managing a Minecraft Bedrock server.
+This repository contains a small Discord bot and a `SubdomainManager` helper that
+creates simple HTML sites for users and (optionally) creates DNS records via the
+Porkbun API.
 
-## Features
+This implementation is intentionally safe for local testing:
+- By default it writes sites to `./sites/<subdomain>.info.4rc.in/index.html` (no sudo required).
+- DNS creation is a no-op (dry-run) unless you set `PORKBUN_APIKEY` and `PORKBUN_SECRET`.
 
-- **Role Assignment**: Automatically assigns roles based on user introductions.
-- **Minecraft Server Management**: Edit server properties and restart the server through Discord commands.
-- **Dynamic Responses**: Responds to messages with a friendly, formal, or humorous tone based on user input.
-- **Avatar Retrieval**: Fetches and displays user avatars on demand.
-- **Welcome Messages**: Sends aesthetic welcome messages to new members.
+Files of interest
+- `src/subdomain_manager.py` — core logic: sanitize, write site, (optionally) call DNS API
+- `src/bot.py` — minimal Discord bot exposing `!create <html>` command
+- `requirements.txt` — Python dependencies
 
-## Setup
+Quick start (local, test-only)
 
-### Prerequisites
+1. Create a virtualenv and install deps (fish shell):
 
-- Python 3.8+
-- `discord.py` library
-- `google.generativeai` library
-- A Discord bot token
-- Gemini API key
+```fish
+python -m venv .venv
+. .venv/bin/activate.fish
+pip install -r requirements.txt
+```
 
-### Installation
+2. Run unit tests:
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Arc-001/Jule.git
-   cd Jule
+```fish
+pytest -q
+```
+
+3. Run the bot (optional)
+
+Create a `.env` file based on `.env.example` and set `DISCORD_TOKEN`.
+
+```fish
+python -m src.bot
+```
+
+Notes & next steps
+- For production use you'd want to: tighten HTML sanitization rules, add rate-limiting,
+  enforce quotas, persist mappings in a database, and secure DNS and webserver operations.
+- The repo writes to `./sites` by default for safety. Point `SubdomainManager(base_path=...)`
+  to `/var/www/html/user-sites` when deploying on your server.
