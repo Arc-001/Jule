@@ -24,6 +24,10 @@ COMMAND_PREFIX = os.environ.get("COMMAND_PREFIX", "!")
 
 bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=None)
 
+intents = discord.Intents.default()
+intents.message_content = True
+
+client = discord.Client(intents=intents)
 
 @bot.event
 async def on_ready():
@@ -96,3 +100,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    client.run(DISCORD_TOKEN)
