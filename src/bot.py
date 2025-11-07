@@ -13,7 +13,7 @@ import os
 import asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
-
+import discord
 from subdomain_manager import SubdomainManager
 
 
@@ -55,20 +55,35 @@ async def on_guild_join(guild):
         except Exception as e:
             print(f"Could not send greeting to {guild.name}: {e}")
 
+@client.event
+async def on_message(message):
+    #Check for self messages
+    if message.author == client.user:
+        return
 
-@bot.command(name="create")
-async def create_site(ctx, *, html_content: str):
-    """Create a site using the message author as identifier.
+    if message.content.startswith('!create'):
+        message.channel.send('Creating your site...')
+        manager = SubdomainManager()
+        try:
+            url = await manager.create_user_site(message.author.name, message.content[8:])
+            await message.channel.send(f"Your site is (or will be) available at: {url}")
+        except Exception as exc:
+            await message.channel.send(f"Error creating site: {exc}")
 
-    Usage: !create <html content>
-    """
-    await ctx.send("Creating your site... This may take a moment.")
-    manager = SubdomainManager()
-    try:
-        url = await manager.create_user_site(ctx.author.name, html_content)
-        await ctx.send(f"✅ Your site is (or will be) available at: {url}")
-    except Exception as exc:
-        await ctx.send(f"❌ Error creating site: {exc}")
+#
+# @bot.command(name="create")
+# async def create_site(ctx, *, html_content: str):
+#     """Create a site using the message author as identifier.
+#
+#     Usage: !create <html content>
+#     """
+#     await ctx.send("Creating your site... This may take a moment.")
+#     manager = SubdomainManager()
+#     try:
+#         url = await manager.create_user_site(ctx.author.name, html_content)
+#         await ctx.send(f"✅ Your site is (or will be) available at: {url}")
+#     except Exception as exc:
+#         await ctx.send(f"❌ Error creating site: {exc}")
 
 
 
