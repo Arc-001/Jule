@@ -20,9 +20,9 @@ pip install -r requirements.txt
 
 #start jule bot in background
 echo "Starting Jule Bot..."
-coproc python3 src/bot.py >> bot.log 2>&1 &
-
-
+cd src
+coproc python3 bot.py >> bot.log 2>&1 &
+cd ..
 #sleep so that the db is made
 sleep 5
 
