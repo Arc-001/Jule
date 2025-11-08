@@ -47,51 +47,51 @@ MIN_INTRO_LENGTH = 50  # Minimum characters for intro to trigger role assignment
 
 # ============= FUN RESPONSES =============
 GREETINGS = [
-    "Hey there! 👋 What's up?",
-    "Hello! 😊 How can I make your day better?",
-    "Hi! 🌟 Great to see you!",
-    "Heya! 💫 Ready for some fun?",
-    "Greetings! ✨ How are you doing today?"
+    "Hey there!  What's up?",
+    "Hello! How can I make your day better?",
+    "Hi! Great to see you!",
+    "Heya! Ready for some fun?",
+    "Greetings! How are you doing today?"
 ]
 
 ENCOURAGEMENTS = [
-    "You're doing amazing! 🌟",
-    "Keep being awesome! 💪",
-    "You're a star! ⭐",
-    "Love your energy! ✨",
-    "You're the best! 🎉"
+    "You're doing amazing! ",
+    "Keep being awesome! ",
+    "You're a star! ",
+    "Love your energy! ",
+    "You're the best! "
 ]
 
 RANDOM_FACTS = [
     "Honey never spoils! Archaeologists have found 3000-year-old honey that's still edible.",
     "Octopuses have three hearts! Two pump blood to the gills, one to the rest of the body.",
-    "Bananas are berries, but strawberries aren't! 🍌",
-    "A group of flamingos is called a 'flamboyance'! 🦩",
+    "Bananas are berries, but strawberries aren't! ",
+    "A group of flamingos is called a 'flamboyance'! ",
     "The inventor of the Pringles can is now buried in one!",
-    "Sea otters hold hands while sleeping so they don't drift apart! 🦦",
-    "A bolt of lightning is five times hotter than the surface of the sun! ⚡"
+    "Sea otters hold hands while sleeping so they don't drift apart! ",
+    "A bolt of lightning is five times hotter than the surface of the sun! "
 ]
 
 COMPLIMENTS = [
-    "is absolutely wonderful! 🌟",
-    "lights up the server! ✨",
-    "is incredibly kind! 💖",
-    "has amazing energy! ⚡",
-    "is a true gem! 💎",
-    "makes everyone smile! 😊",
-    "is super awesome! 🚀"
+    "is absolutely wonderful! ",
+    "lights up the server! ",
+    "is incredibly kind! ",
+    "has amazing energy! ",
+    "is a true gem! ",
+    "makes everyone smile! ",
+    "is super awesome! "
 ]
 
 EIGHT_BALL_RESPONSES = [
-    "Yes, absolutely! ✨",
-    "No doubt about it! 💫",
-    "Definitely yes! 🌟",
-    "Maybe... 🤔",
-    "Ask again later... ⏰",
-    "Cannot predict now... 🔮",
-    "No way! ❌",
-    "Don't count on it... 😬",
-    "Very doubtful... 🤨"
+    "Yes, absolutely! ",
+    "No doubt about it! ",
+    "Definitely yes! ",
+    "Maybe... ",
+    "Ask again later... ",
+    "Cannot predict now... ",
+    "No way! ",
+    "Don't count on it... ",
+    "Very doubtful... "
 ]
 
 RANDOM_REACTIONS = ["👍", "❤️", "✨", "🎉", "😊", "👏", "🌟"]
