@@ -313,8 +313,8 @@ if __name__ == '__main__':
     os.makedirs('dashboard/static/css', exist_ok=True)
     os.makedirs('dashboard/static/js', exist_ok=True)
     
-    print("🚀 Starting Jule Dashboard on http://localhost:80")
+    print("🚀 Starting Jule Dashboard on http://localhost:8080")
     print("📊 Dashboard ready!")
     
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
 
