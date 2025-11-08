@@ -23,8 +23,8 @@ CHANNELS_CONFIG_PATH = "config/channels.json"
 ROLES_CONFIG_PATH = "config/roles.json"
 
 # ============= SPAM DETECTION =============
-SPAM_THRESHOLD = 15  # Number of messages
-SPAM_TIMEFRAME = 1200  # Seconds (20 minutes)
+SPAM_THRESHOLD = 15
+SPAM_TIMEFRAME = 20
 
 # ============= POINTS SYSTEM =============
 MESSAGES_PER_POINT = 10  # Award 1 point per 10 messages
