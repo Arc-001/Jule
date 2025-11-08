@@ -12,7 +12,7 @@ import discord
 class SpamDetector:
     """Spam detection service using message tracking"""
 
-    def __init__(self, db: Database, threshold: int = 10, timeframe: int = 20):
+    def __init__(self, db: Database, threshold: int = 15, timeframe: int = 1200):
         """
         Initialize spam detector
 
@@ -102,21 +102,53 @@ class SpamDetector:
             action="messages_deleted"
         )
 
-        # Delete messages from Discord
+        # Delete messages from Discord using bulk delete
+        # This is much more efficient and avoids rate limiting
         deleted_ids = []
-        for msg_id in message_ids:
-            try:
-                msg = await message.channel.fetch_message(msg_id)
-                await msg.delete()
-                deleted_ids.append(msg_id)
-            except discord.NotFound:
-                # Message already deleted
-                pass
-            except discord.Forbidden:
-                # No permission to delete
-                pass
-            except Exception as e:
-                print(f"Error deleting message {msg_id}: {e}")
+
+        try:
+            # Use purge with a check function to delete only the spam messages
+            # purge handles rate limiting automatically
+            message_ids_set = set(message_ids)
+
+            def check_message(m):
+                return m.id in message_ids_set
+
+            # Purge will only delete messages less than 14 days old
+            # It returns a list of deleted messages
+            deleted_messages = await message.channel.purge(
+                limit=20,  # Check last 100 messages to find our spam messages
+                check=check_message,
+                bulk=True  # Use bulk delete when possible (much faster)
+            )
+
+            deleted_ids = [msg.id for msg in deleted_messages]
+
+        except discord.Forbidden:
+            # No permission to delete - fallback to individual deletion
+            print(f"No permission to bulk delete messages in channel {message.channel.id}")
+            for msg_id in message_ids:
+                try:
+                    msg = await message.channel.fetch_message(msg_id)
+                    await msg.delete()
+                    deleted_ids.append(msg_id)
+                except (discord.NotFound, discord.Forbidden):
+                    pass
+                except Exception as e:
+                    print(f"Error deleting message {msg_id}: {e}")
+
+        except Exception as e:
+            print(f"Error during bulk delete: {e}")
+            # Fallback to individual deletion
+            for msg_id in message_ids:
+                try:
+                    msg = await message.channel.fetch_message(msg_id)
+                    await msg.delete()
+                    deleted_ids.append(msg_id)
+                except (discord.NotFound, discord.Forbidden):
+                    pass
+                except Exception as e:
+                    print(f"Error deleting message {msg_id}: {e}")
 
         # Clean up from tracking
         self.db.delete_tracked_messages(deleted_ids)

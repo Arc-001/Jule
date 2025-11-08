@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jule Bot Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-robot"></i>
+                <span>Jule Bot Dashboard</span>
+            </div>
+            <div class="nav-time" id="currentTime"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Stats Overview -->
+        <section class="stats-section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-line"></i> Overview
+            </h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalUsers">-</h3>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalPoints">-</h3>
+                        <p>Total Points</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-message"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalMessages">-</h3>
+                        <p>Total Messages</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="activeReminders">-</h3>
+                        <p>Active Reminders</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon pink">
+                        <i class="fas fa-cake-candles"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalBirthdays">-</h3>
+                        <p>Birthdays</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="spamToday">-</h3>
+                        <p>Spam Today</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon cyan">
+                        <i class="fas fa-chart-simple"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="messages24h">-</h3>
+                        <p>Messages (24h)</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon yellow">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="uptime">-</h3>
+                        <p>Uptime</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="chart-container">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-area"></i> Activity (Last 7 Days)
+                </h2>
+                <canvas id="activityChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Two Column Layout -->
+        <div class="two-column">
+            <!-- Leaderboard -->
+            <section class="card">
+                <h2 class="section-title">
+                    <i class="fas fa-trophy"></i> Top Users
+                </h2>
+                <div class="leaderboard" id="leaderboard">
+                    <div class="loading">Loading...</div>
+                </div>
+            </section>
+
+            <!-- Upcoming Birthdays -->
+            <section class="card">
+                <h2 class="section-title">
+                    <i class="fas fa-birthday-cake"></i> Upcoming Birthdays
+                </h2>
+                <div class="birthdays-list" id="birthdaysList">
+                    <div class="loading">Loading...</div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Birthday Calendar -->
+        <section class="calendar-section">
+            <h2 class="section-title">
+                <i class="fas fa-calendar-alt"></i> Birthday Calendar
+            </h2>
+            <div class="calendar-container" id="birthdayCalendar">
+                <div class="loading">Loading calendar...</div>
+            </div>
+        </section>
+
+        <!-- Recent Spam Logs -->
+        <section class="logs-section">
+            <h2 class="section-title">
+                <i class="fas fa-exclamation-triangle"></i> Recent Spam Detection
+            </h2>
+            <div class="logs-container">
+                <table class="logs-table" id="spamLogs">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Username</th>
+                            <th>Guild ID</th>
+                            <th>Message Count</th>
+                            <th>Timeframe</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="loading">Loading logs...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Reminders -->
+        <section class="reminders-section">
+            <h2 class="section-title">
+                <i class="fas fa-bell"></i> Active Reminders
+            </h2>
+            <div class="reminders-container" id="remindersList">
+                <div class="loading">Loading reminders...</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Jule Bot Dashboard © 2025 | Last updated: <span id="lastUpdated">-</span></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
+

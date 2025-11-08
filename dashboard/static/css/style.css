@@ -1,0 +1,636 @@
+/* Modern Dark Theme Dashboard */
+
+:root {
+    --bg-primary: #0f0f23;
+    --bg-secondary: #1a1a2e;
+    --bg-tertiary: #16213e;
+    --bg-card: #1e2139;
+    --text-primary: #e4e4e7;
+    --text-secondary: #a1a1aa;
+    --accent-blue: #3b82f6;
+    --accent-purple: #a855f7;
+    --accent-green: #10b981;
+    --accent-orange: #f59e0b;
+    --accent-pink: #ec4899;
+    --accent-red: #ef4444;
+    --accent-cyan: #06b6d4;
+    --accent-yellow: #eab308;
+    --border-color: #27272a;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* Navbar */
+.navbar {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 0;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.nav-brand i {
+    color: var(--accent-purple);
+    font-size: 1.75rem;
+}
+
+.nav-time {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Container */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    color: var(--accent-blue);
+}
+
+/* Stats Grid */
+.stats-section {
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-icon.blue { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+.stat-icon.purple { background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); }
+.stat-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+.stat-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--accent-orange); }
+.stat-icon.pink { background: rgba(236, 72, 153, 0.2); color: var(--accent-pink); }
+.stat-icon.red { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+.stat-icon.cyan { background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); }
+.stat-icon.yellow { background: rgba(234, 179, 8, 0.2); color: var(--accent-yellow); }
+
+.stat-info h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-info p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Charts */
+.charts-section {
+    margin-bottom: 2rem;
+}
+
+.chart-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+#activityChart {
+    max-height: 300px;
+}
+
+/* Two Column Layout */
+.two-column {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+/* Leaderboard */
+.leaderboard {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.leaderboard-item:hover {
+    background: var(--bg-secondary);
+    transform: translateX(4px);
+}
+
+.rank {
+    font-size: 1.25rem;
+    font-weight: 700;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-purple);
+    color: white;
+}
+
+.rank.gold { background: linear-gradient(135deg, #ffd700, #ffed4e); color: var(--bg-primary); }
+.rank.silver { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: var(--bg-primary); }
+.rank.bronze { background: linear-gradient(135deg, #cd7f32, #e6a961); color: var(--bg-primary); }
+
+.user-info {
+    flex: 1;
+}
+
+.user-id {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.user-points {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.points-badge {
+    background: var(--accent-purple);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Birthdays */
+.birthdays-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.birthday-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.birthday-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.birthday-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent-pink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.birthday-details {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.birthday-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.days-until {
+    background: var(--accent-pink);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Logs Section */
+.logs-section {
+    margin-bottom: 2rem;
+}
+
+.logs-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.logs-table thead {
+    background: var(--bg-tertiary);
+}
+
+.logs-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logs-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.logs-table tbody tr:hover {
+    background: var(--bg-tertiary);
+}
+
+.action-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.action-badge.warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--accent-orange);
+}
+
+.action-badge.danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--accent-red);
+}
+
+/* Reminders */
+.reminders-section {
+    margin-bottom: 2rem;
+}
+
+.reminders-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.reminder-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.25rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.reminder-item:hover {
+    background: var(--bg-secondary);
+}
+
+.reminder-content {
+    flex: 1;
+}
+
+.reminder-message {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.reminder-meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.reminder-time {
+    background: var(--accent-blue);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* Loading */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Footer */
+.footer {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+    margin-top: 4rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-card, .card, .leaderboard-item, .birthday-item, .reminder-item {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .two-column {
+        grid-template-columns: 1fr;
+    }
+
+    .logs-container {
+        overflow-x: auto;
+    }
+
+    .logs-table {
+        min-width: 600px;
+    }
+
+    .calendar-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Birthday Calendar */
+.calendar-section {
+    margin-bottom: 2rem;
+}
+
+.calendar-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.calendar-month {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.calendar-month.has-birthdays {
+    border-color: var(--accent-pink);
+}
+
+.calendar-month.has-birthdays:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(236, 72, 153, 0.2);
+}
+
+.month-header {
+    background: var(--bg-card);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.calendar-month.has-birthdays .month-header {
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+}
+
+.month-header i {
+    color: var(--accent-pink);
+    font-size: 1.1rem;
+}
+
+.calendar-month.has-birthdays .month-header i {
+    color: white;
+}
+
+.month-header span {
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.calendar-month.has-birthdays .month-header span {
+    color: white;
+}
+
+.birthday-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.month-birthdays {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: 80px;
+}
+
+.no-birthdays {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+.calendar-birthday-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.calendar-birthday-item:hover {
+    background: var(--bg-secondary);
+    border-color: var(--accent-pink);
+    transform: translateX(4px);
+}
+
+.birthday-day {
+    min-width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--accent-pink);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.birthday-username {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    word-break: break-word;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+
