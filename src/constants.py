@@ -13,6 +13,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ============= CHANNEL IDS =============
 GREET_CHANNEL_ID = 1436379982015365251
+MUSIC_CHANNEL_ID = 1437826614284124171  # Set to specific channel ID if needed, None for any channel
 
 # ============= ROLE IDS =============
 DEFAULT_ROLE_ID = 1436762166001930261
@@ -44,6 +45,11 @@ MAX_CLEAR_MESSAGES = 100
 
 # ============= INTRO CHANNEL =============
 MIN_INTRO_LENGTH = 50  # Minimum characters for intro to trigger role assignment
+
+# ============= MUSIC SYSTEM =============
+MAX_QUEUE_SIZE = 50  # Maximum songs in queue
+MAX_SEARCH_RESULTS = 5  # Maximum search results to display
+MUSIC_INACTIVITY_TIMEOUT = 300  # Disconnect after 5 minutes of inactivity
 
 # ============= FUN RESPONSES =============
 GREETINGS = [

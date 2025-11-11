@@ -233,15 +233,45 @@ class BirthdayService:
     def __init__(self, db: Database):
         self.db = db
 
-    def add_birthday(self, user_id: int, month: int, day: int):
-        """Add user's birthday"""
+    def set_birthday(self, user_id: int, month: int, day: int):
+        """Set user's birthday"""
         self.db.add_birthday(user_id, month, day)
 
-    def get_birthday(self, user_id: int) -> Optional[tuple]:
+    def get_birthday(self, user_id: int):
         """Get user's birthday"""
         return self.db.get_birthday(user_id)
 
-    def get_todays_birthdays(self) -> List[int]:
-        """Get users with birthdays today"""
+    def get_todays_birthdays(self):
+        """Get all birthdays today"""
         return self.db.get_todays_birthdays()
+
+
+class MusicService:
+    """Service for managing music statistics and tracking"""
+
+    def __init__(self, db: Database):
+        self.db = db
+
+    def log_play(self, user_id: int, song_title: str, song_url: str,
+                 artist: Optional[str] = None, duration: Optional[int] = None,
+                 guild_id: Optional[int] = None):
+        """Log a song play"""
+        self.db.log_music_play(user_id, song_title, song_url, artist, duration, guild_id)
+
+    def get_user_stats(self, user_id: int) -> Optional[Dict]:
+        """Get user's music statistics"""
+        return self.db.get_user_music_stats(user_id)
+
+    def get_top_songs(self, user_id: int, limit: int = 10) -> List[Dict]:
+        """Get user's top played songs"""
+        return self.db.get_user_top_songs(user_id, limit)
+
+    def get_leaderboard(self, limit: int = 10) -> List[tuple]:
+        """Get music listening leaderboard"""
+        return self.db.get_music_leaderboard(limit)
+
+    def set_favorite_song(self, user_id: int, song_title: str):
+        """Set user's favorite song"""
+        self.db.update_favorite_song(user_id, song_title)
+
 

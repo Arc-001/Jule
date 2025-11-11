@@ -14,7 +14,7 @@ from constants import (
     GREETINGS, RANDOM_REACTIONS, RANDOM_REACTION_CHANCE, MIN_INTRO_LENGTH
 )
 from model.model import Database
-from model.services import SpamDetector, ReminderService, PointsService, BirthdayService
+from model.services import SpamDetector, ReminderService, PointsService, BirthdayService, MusicService
 from model.role_assigner import RoleAssigner
 from utils import load_json_config, get_avatar_url
 
@@ -29,6 +29,7 @@ spam_detector = SpamDetector(db, threshold=SPAM_THRESHOLD, timeframe=SPAM_TIMEFR
 reminder_service = ReminderService(db)
 points_service = PointsService(db)
 birthday_service = BirthdayService(db)
+music_service = MusicService(db)
 role_assigner = RoleAssigner(ROLES_CONFIG_PATH)
 
 # Attach services to bot for cog access
@@ -37,6 +38,7 @@ bot.spam_detector = spam_detector
 bot.reminder_service = reminder_service
 bot.points_service = points_service
 bot.birthday_service = birthday_service
+bot.music_service = music_service
 bot.role_assigner = role_assigner
 
 # Load channel mappings
@@ -140,7 +142,8 @@ async def load_extensions():
         'cogs.game_commands',
         'cogs.community_commands',
         'cogs.utility_commands',
-        'cogs.admin_commands'
+        'cogs.admin_commands',
+        'cogs.music_commands'
     ]
 
     for extension in extensions:

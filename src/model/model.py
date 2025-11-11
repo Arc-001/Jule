@@ -88,6 +88,30 @@ class ServerSettings(Base):
     settings_updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class MusicStats(Base):
+    __tablename__ = 'music_stats'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, nullable=False)
+    song_title = Column(String(500), nullable=False)
+    song_url = Column(Text, nullable=False)
+    artist = Column(String(255), nullable=True)
+    duration = Column(Integer, nullable=True)  # Duration in seconds
+    played_at = Column(DateTime, default=datetime.utcnow)
+    guild_id = Column(BigInteger, nullable=True)
+
+
+class UserMusicStats(Base):
+    __tablename__ = 'user_music_stats'
+
+    user_id = Column(BigInteger, primary_key=True)
+    total_songs_played = Column(Integer, default=0)
+    total_listening_time = Column(BigInteger, default=0)  # Total time in seconds
+    favorite_song = Column(String(500), nullable=True)
+    last_played_at = Column(DateTime, nullable=True)
+    last_updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 # ============= DATABASE CLASS =============
 
 class Database:
@@ -375,8 +399,8 @@ class Database:
 
     # ============= USER CACHE =============
 
-    def update_user_cache(self, user_id: int, username: str, display_name: str = None, avatar_url: str = None):
-        """Update or add user to cache"""
+    def update_user_cache(self, user_id: int, username: str, display_name: str, avatar_url: Optional[str]):
+        """Update or create user cache entry"""
         session = self.get_session()
         try:
             user = session.query(UserCache).filter_by(user_id=user_id).first()
@@ -394,6 +418,126 @@ class Database:
                 )
                 session.add(user)
             session.commit()
+        finally:
+            session.close()
+
+    def get_user_cache(self, user_id: int) -> Optional[Dict]:
+        """Get cached user info"""
+        session = self.get_session()
+        try:
+            user = session.query(UserCache).filter_by(user_id=user_id).first()
+            if user:
+                return {
+                    'username': user.username,
+                    'display_name': user.display_name,
+                    'avatar_url': user.avatar_url,
+                    'last_updated': user.last_updated
+                }
+            return None
+        finally:
+            session.close()
+
+    # ============= MUSIC STATS =============
+
+    def log_music_play(self, user_id: int, song_title: str, song_url: str,
+                       artist: Optional[str] = None, duration: Optional[int] = None,
+                       guild_id: Optional[int] = None):
+        """Log a song play event"""
+        session = self.get_session()
+        try:
+            # Add to music stats
+            stat = MusicStats(
+                user_id=user_id,
+                song_title=song_title,
+                song_url=song_url,
+                artist=artist,
+                duration=duration,
+                guild_id=guild_id
+            )
+            session.add(stat)
+
+            # Update user music stats
+            user_stat = session.query(UserMusicStats).filter_by(user_id=user_id).first()
+            if user_stat:
+                user_stat.total_songs_played += 1
+                if duration:
+                    user_stat.total_listening_time += duration
+                user_stat.last_played_at = datetime.utcnow()
+                user_stat.last_updated = datetime.utcnow()
+            else:
+                user_stat = UserMusicStats(
+                    user_id=user_id,
+                    total_songs_played=1,
+                    total_listening_time=duration if duration else 0,
+                    last_played_at=datetime.utcnow()
+                )
+                session.add(user_stat)
+
+            session.commit()
+        finally:
+            session.close()
+
+    def get_user_music_stats(self, user_id: int) -> Optional[Dict]:
+        """Get music statistics for a user"""
+        session = self.get_session()
+        try:
+            stats = session.query(UserMusicStats).filter_by(user_id=user_id).first()
+            if stats:
+                return {
+                    'total_songs': stats.total_songs_played,
+                    'total_time': stats.total_listening_time,
+                    'favorite_song': stats.favorite_song,
+                    'last_played': stats.last_played_at
+                }
+            return None
+        finally:
+            session.close()
+
+    def get_user_top_songs(self, user_id: int, limit: int = 10) -> List[Dict]:
+        """Get user's most played songs"""
+        session = self.get_session()
+        try:
+            from sqlalchemy import func
+            results = session.query(
+                MusicStats.song_title,
+                MusicStats.artist,
+                func.count(MusicStats.id).label('play_count')
+            ).filter(
+                MusicStats.user_id == user_id
+            ).group_by(
+                MusicStats.song_title, MusicStats.artist
+            ).order_by(
+                func.count(MusicStats.id).desc()
+            ).limit(limit).all()
+
+            return [{
+                'title': r.song_title,
+                'artist': r.artist,
+                'plays': r.play_count
+            } for r in results]
+        finally:
+            session.close()
+
+    def get_music_leaderboard(self, limit: int = 10) -> List[Tuple[int, int]]:
+        """Get top users by total songs played"""
+        session = self.get_session()
+        try:
+            users = session.query(UserMusicStats).order_by(
+                UserMusicStats.total_songs_played.desc()
+            ).limit(limit).all()
+            return [(user.user_id, user.total_songs_played) for user in users]
+        finally:
+            session.close()
+
+    def update_favorite_song(self, user_id: int, song_title: str):
+        """Update user's favorite song"""
+        session = self.get_session()
+        try:
+            user_stat = session.query(UserMusicStats).filter_by(user_id=user_id).first()
+            if user_stat:
+                user_stat.favorite_song = song_title
+                user_stat.last_updated = datetime.utcnow()
+                session.commit()
         finally:
             session.close()
 
