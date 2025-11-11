@@ -32,6 +32,21 @@ YTDL_OPTIONS = {
     'no_warnings': True,
     'default_search': 'ytsearch',
     'source_address': '0.0.0.0',
+    # Add headers to avoid bot detection
+    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'referer': 'https://www.youtube.com/',
+    # Age gate bypass
+    'age_limit': None,
+    # Cookie handling (optional - will try without first)
+    'cookiesfrombrowser': ('firefox',),  # Can be set to ('firefox',) or ('chrome',) if needed
+    # Additional options to avoid detection
+    'extractor_args': {
+        'youtube': {
+            'skip': ['hls', 'dash'],  # Skip DASH and HLS streams
+            'player_skip': ['webpage', 'configs'],
+            'player_client': ['android', 'web'],  # Try multiple clients
+        }
+    },
 }
 
 FFMPEG_OPTIONS = {
@@ -178,10 +193,34 @@ class MusicCommands(commands.Cog):
             data = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(search_query, download=False))
 
             if 'entries' in data:
-                return data['entries']
+                # Filter out None entries (failed extractions)
+                valid_entries = [e for e in data['entries'] if e is not None]
+                return valid_entries
             return []
         except Exception as e:
-            print(f"Error searching YouTube: {e}")
+            error_msg = str(e)
+            if 'Sign in to confirm' in error_msg or 'bot' in error_msg.lower():
+                print(f"YouTube bot detection triggered. Try using cookies or wait a moment.")
+                print(f"Full error: {error_msg}")
+                # Try with a simpler search
+                try:
+                    # Create a new ytdl instance with different options
+                    simple_ytdl = yt_dlp.YoutubeDL({
+                        'format': 'bestaudio/best',
+                        'quiet': True,
+                        'no_warnings': True,
+                        'default_search': 'ytsearch',
+                        'extract_flat': True,  # Don't extract full info, just search results
+                    })
+                    search_query = f"ytsearch{max_results}:{query}"
+                    data = await loop.run_in_executor(None, lambda: simple_ytdl.extract_info(search_query, download=False))
+                    if 'entries' in data:
+                        valid_entries = [e for e in data['entries'] if e is not None]
+                        return valid_entries
+                except Exception as e2:
+                    print(f"Fallback search also failed: {e2}")
+            else:
+                print(f"Error searching YouTube: {error_msg}")
             return []
 
     async def get_song_info(self, url_or_query: str) -> Optional[dict]:
@@ -197,10 +236,33 @@ class MusicCommands(commands.Cog):
                 data = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(f"ytsearch1:{url_or_query}", download=False))
 
             if 'entries' in data:
-                return data['entries'][0]
+                return data['entries'][0] if data['entries'] else None
             return data
         except Exception as e:
-            print(f"Error getting song info: {e}")
+            error_msg = str(e)
+            if 'Sign in to confirm' in error_msg or 'bot' in error_msg.lower():
+                print(f"YouTube bot detection: {error_msg}")
+                # Try with extract_flat to get basic info
+                try:
+                    simple_ytdl = yt_dlp.YoutubeDL({
+                        'format': 'bestaudio/best',
+                        'quiet': True,
+                        'no_warnings': True,
+                        'default_search': 'ytsearch',
+                        'extract_flat': True,
+                    })
+                    if url_or_query.startswith(('http://', 'https://', 'www.')):
+                        data = await loop.run_in_executor(None, lambda: simple_ytdl.extract_info(url_or_query, download=False))
+                    else:
+                        data = await loop.run_in_executor(None, lambda: simple_ytdl.extract_info(f"ytsearch1:{url_or_query}", download=False))
+
+                    if 'entries' in data:
+                        return data['entries'][0] if data['entries'] else None
+                    return data
+                except Exception as e2:
+                    print(f"Fallback extraction also failed: {e2}")
+            else:
+                print(f"Error getting song info: {error_msg}")
             return None
 
     async def play_next(self, guild_id: int, text_channel: discord.TextChannel):
@@ -318,7 +380,25 @@ class MusicCommands(commands.Cog):
             results = await self.search_youtube(query)
 
             if not results:
-                await ctx.send("❌ No results found!")
+                error_embed = discord.Embed(
+                    title="❌ No Results Found",
+                    description="Couldn't find any songs. This might be due to:",
+                    color=discord.Color.red()
+                )
+                error_embed.add_field(
+                    name="Possible Issues",
+                    value=(
+                        "• YouTube bot detection (temporary)\n"
+                        "• Invalid search query\n"
+                        "• Network issues\n\n"
+                        "**Try:**\n"
+                        "• Using different search terms\n"
+                        "• Waiting a few moments and trying again\n"
+                        "• Using a direct YouTube URL"
+                    ),
+                    inline=False
+                )
+                await ctx.send(embed=error_embed)
                 return
 
             # Create search results embed
