@@ -55,4 +55,5 @@ data/
 .pytest_cache/
 .coverage
 htmlcov/
+.venv
 

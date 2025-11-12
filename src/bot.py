@@ -138,6 +138,7 @@ async def on_ready():
 async def load_extensions():
     """Load all command cogs"""
     extensions = [
+        'cogs.help_commands',
         'cogs.fun_commands',
         'cogs.game_commands',
         'cogs.community_commands',
