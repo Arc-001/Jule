@@ -81,7 +81,12 @@ class AICommands(commands.Cog):
     async def search_wikipedia(self, query: str, sentences: int = 3) -> dict:
         """Search Wikipedia and return a summary"""
         try:
-            async with aiohttp.ClientSession() as session:
+            # Wikipedia requires a User-Agent header
+            headers = {
+                "User-Agent": "JuleBot/1.0 (Discord Bot; Python/aiohttp)"
+            }
+
+            async with aiohttp.ClientSession(headers=headers) as session:
                 # Search for the page
                 search_params = {
                     "action": "query",
@@ -106,8 +111,8 @@ class AICommands(commands.Cog):
                     "action": "query",
                     "format": "json",
                     "prop": "extracts|pageimages",
-                    "exintro": True,
-                    "explaintext": True,
+                    "exintro": 1,
+                    "explaintext": 1,
                     "exsentences": sentences,
                     "pageids": page_id,
                     "piprop": "original"
