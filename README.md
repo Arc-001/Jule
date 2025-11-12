@@ -12,7 +12,7 @@ A friendly, feature-rich Discord bot with AI-powered commands, music playback, c
 - **Quizzes**: Interactive quiz questions
 - **Translations**: Multi-language text translation
 - **Debates**: Generate balanced debate points
-- **And more!** See [AI_COMMANDS.md](AI_COMMANDS.md) for full documentation
+- **And more!**
 
 ### Music Commands
 - Play music from YouTube with search functionality
