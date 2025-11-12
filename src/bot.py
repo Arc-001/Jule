@@ -143,7 +143,8 @@ async def load_extensions():
         'cogs.community_commands',
         'cogs.utility_commands',
         'cogs.admin_commands',
-        'cogs.music_commands'
+        'cogs.music_commands',
+        'cogs.ai_commands'
     ]
 
     for extension in extensions:
