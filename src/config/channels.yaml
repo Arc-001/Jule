@@ -1,0 +1,76 @@
+# Space-Themed Discord Channel Configuration
+# This file defines the channel structure for your Discord server
+# Run !syncchannels to create/sync these channels with your server
+
+# Category-based channel structure
+categories:
+  # Mission Control - Administrative channels
+  "🚀 Mission Control":
+    channels:
+      - name: "📢・announcements"
+        type: "text"
+        description: "Important server announcements and updates"
+
+      - name: "📋・rules"
+        type: "text"
+        description: "Server rules and guidelines"
+
+      - name: "🎫・support"
+        type: "text"
+        description: "Get help from the crew"
+
+  # Launch Bay - Social channels
+  "🌌 Launch Bay":
+    channels:
+      - name: "💬・general"
+        type: "text"
+        description: "Main chat - talk about anything!"
+
+      - name: "👋・introductions"
+        type: "text"
+        description: "Introduce yourself to the crew"
+
+      - name: "🎉・events"
+        type: "text"
+        description: "Community events and activities"
+
+  # Space Station - Topic channels
+  "🛸 Space Station":
+    channels:
+      - name: "🎮・gaming"
+        type: "text"
+        description: "Gaming discussions and LFG"
+
+      - name: "🎨・creative"
+        type: "text"
+        description: "Share your art, music, and creations"
+
+      - name: "🤖・bot-commands"
+        type: "text"
+        description: "Test bot commands here"
+
+      - name: "📸・media"
+        type: "text"
+        description: "Share memes, images, and videos"
+
+  # Voice Hangar - Voice channels
+  "🎤 Voice Hangar":
+    channels:
+      - name: "🔊・Main Bay"
+        type: "voice"
+        description: "General voice chat"
+
+      - name: "🎵・Music Station"
+        type: "voice"
+        description: "Listen to music together"
+
+      - name: "🎮・Gaming Pod"
+        type: "voice"
+        description: "Voice chat for gaming sessions"
+
+# Standalone channels (no category)
+standalone:
+  - name: "🌟・starboard"
+    type: "text"
+    description: "Highlights from the community"
+

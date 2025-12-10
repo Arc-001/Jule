@@ -30,7 +30,7 @@ class AICommands(commands.Cog):
             self.model = None
         else:
             genai.configure(api_key=GEMINI_API_KEY)
-            self.model = genai.GenerativeModel('gemini-2.5-flash-lite')
+            self.model = genai.GenerativeModel('gemini-2.5-flash')
 
         # Wikipedia API endpoint
         self.wikipedia_api = "https://en.wikipedia.org/w/api.php"

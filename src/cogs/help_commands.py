@@ -59,10 +59,19 @@ class CustomHelpCommand(commands.Cog):
 
         # Game Commands
         embed.add_field(
-            name="🎮 Games",
+            name="🎮 Games (Win Points!)",
             value=(
-                "`!rps <choice>` - Rock Paper Scissors\n"
-                "`!guess` - Number guessing game"
+                "`!rps <choice>` - Rock Paper Scissors (2pts)\n"
+                "`!guess` - Number guessing (5pts)\n"
+                "`!trivia [diff] [genre]` - Trivia (5-20pts)\n"
+                "`!triviacomp [diff] [genre]` - 10Q competition\n"
+                "`!triviahelp` - Trivia guide & options\n"
+                "`!scramble` - Unscramble word (8pts)\n"
+                "`!math` - Quick math (5pts)\n"
+                "`!reaction` - Speed test (15pts)\n"
+                "`!21` - Blackjack game (20pts)\n"
+                "`!flip <h/t>` - Coin flip (3pts)\n"
+                "`!slots` - Slot machine (up to 100pts!)"
             ),
             inline=False
         )
@@ -131,9 +140,27 @@ class CustomHelpCommand(commands.Cog):
                 value=(
                     "`!announce <msg>` - Announcement\n"
                     "`!clear <num>` - Clear messages\n"
+                    "`!setintrochannel [#ch]` - Set/clear intro channel\n"
+                    "`!getintrochannel` - View intro channel\n"
                     "`!reloadroles` - Reload roles\n"
                     "`!testrole <msg>` - Test role assign\n"
-                    "`!syncroles` - Sync roles config"
+                    "`!syncroles [file]` - Sync roles\n"
+                    "`!syncchannels [file]` - Sync channels"
+                ),
+                inline=False
+            )
+
+            # Template Management Commands (admin only)
+            embed.add_field(
+                name="🤖 AI Template Manager",
+                value=(
+                    "`!genroles <desc>` - Generate roles template\n"
+                    "`!genchannels <desc>` - Generate channels template\n"
+                    "`!applyroles <file> confirm` - Apply roles template\n"
+                    "`!applychannels <file> confirm` - Apply channels template\n"
+                    "`!listtemplates` - List all templates\n"
+                    "`!listbackups [type]` - List backups\n"
+                    "`!reverttemplate <file> confirm` - Restore backup"
                 ),
                 inline=False
             )

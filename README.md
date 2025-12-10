@@ -49,6 +49,11 @@ A friendly, feature-rich Discord bot with AI-powered commands, music playback, c
 ### Admin Commands
 - Clear messages
 - User warnings
+- **AI Template Manager**: Generate and manage server roles/channels with AI
+  - Generate custom templates from natural language descriptions
+  - Safely apply templates with automatic backups
+  - Revert to previous configurations
+  - See [AI_TEMPLATE_MANAGER_GUIDE.md](AI_TEMPLATE_MANAGER_GUIDE.md) for details
 - Kick/ban users
 - Announcement system
 

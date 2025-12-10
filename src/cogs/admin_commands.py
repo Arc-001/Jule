@@ -5,6 +5,8 @@ Handles moderation and administration commands
 
 import asyncio
 import json
+import yaml
+from pathlib import Path
 import discord
 from discord.ext import commands
 
@@ -61,6 +63,119 @@ class AdminCommands(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Error reloading role mappings: {str(e)}")
 
+    @commands.command(name="setintrochannel", help="[Admin] Set the intro channel for role allocation! Usage: !setintrochannel #channel")
+    @commands.has_permissions(administrator=True)
+    async def setintrochannel(self, ctx: commands.Context, channel: discord.TextChannel = None):
+        """
+        Set the channel where introductions trigger automatic role assignment.
+
+        Usage:
+        - !setintrochannel #introductions - Set the intro channel
+        - !setintrochannel - Clear the intro channel (disable auto role assignment)
+        """
+        try:
+            if channel:
+                # Set the intro channel
+                self.bot.db.update_server_settings(
+                    guild_id=ctx.guild.id,
+                    intro_channel_id=channel.id
+                )
+
+                embed = discord.Embed(
+                    title="✅ Intro Channel Set",
+                    description=f"Automatic role assignment is now enabled for {channel.mention}",
+                    color=discord.Color.green()
+                )
+                embed.add_field(
+                    name="How it works",
+                    value=(
+                        "When users post introductions in this channel:\n"
+                        "• Messages must be at least 50 characters\n"
+                        "• AI analyzes their intro and suggests roles\n"
+                        "• Roles are automatically assigned\n"
+                        "• A welcome message is sent"
+                    ),
+                    inline=False
+                )
+                embed.set_footer(text="Use !testrole <message> to test role assignment")
+                await ctx.send(embed=embed)
+            else:
+                # Clear the intro channel
+                self.bot.db.update_server_settings(
+                    guild_id=ctx.guild.id,
+                    intro_channel_id=None
+                )
+
+                embed = discord.Embed(
+                    title="🔕 Intro Channel Cleared",
+                    description="Automatic role assignment has been disabled.",
+                    color=discord.Color.orange()
+                )
+                embed.add_field(
+                    name="To re-enable",
+                    value="Use `!setintrochannel #channel` to set a new intro channel",
+                    inline=False
+                )
+                await ctx.send(embed=embed)
+
+        except Exception as e:
+            await ctx.send(f"❌ Error setting intro channel: {str(e)}")
+
+    @commands.command(name="getintrochannel", help="[Admin] Check which channel is set for intro role allocation")
+    @commands.has_permissions(administrator=True)
+    async def getintrochannel(self, ctx: commands.Context):
+        """Check the current intro channel setting"""
+        try:
+            server_settings = self.bot.db.get_server_settings(ctx.guild.id)
+            intro_channel_id = server_settings.get('intro_channel_id')
+
+            if intro_channel_id:
+                channel = ctx.guild.get_channel(intro_channel_id)
+                if channel:
+                    embed = discord.Embed(
+                        title="📍 Current Intro Channel",
+                        description=f"Auto role assignment is enabled for {channel.mention}",
+                        color=discord.Color.blue()
+                    )
+                    embed.add_field(
+                        name="Channel ID",
+                        value=str(intro_channel_id),
+                        inline=True
+                    )
+                    embed.add_field(
+                        name="Status",
+                        value="✅ Active",
+                        inline=True
+                    )
+                else:
+                    embed = discord.Embed(
+                        title="⚠️ Invalid Intro Channel",
+                        description=f"Channel ID {intro_channel_id} is set but channel not found.",
+                        color=discord.Color.orange()
+                    )
+                    embed.add_field(
+                        name="Action Required",
+                        value="Use `!setintrochannel #channel` to set a valid channel",
+                        inline=False
+                    )
+            else:
+                embed = discord.Embed(
+                    title="📍 No Intro Channel Set",
+                    description="Automatic role assignment is currently disabled.",
+                    color=discord.Color.grey()
+                )
+                embed.add_field(
+                    name="To enable",
+                    value="Use `!setintrochannel #channel` to set an intro channel",
+                    inline=False
+                )
+
+            embed.set_footer(text="Use !testrole <message> to test role assignment")
+            await ctx.send(embed=embed)
+
+        except Exception as e:
+            await ctx.send(f"❌ Error getting intro channel: {str(e)}")
+
     @commands.command(name="testrole", help="[Admin] Test role assignment for a message! Usage: !testrole <message>")
     @commands.has_permissions(administrator=True)
     async def testrole(self, ctx: commands.Context, *, intro_text: str):
@@ -101,98 +216,433 @@ class AdminCommands(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Error testing role assignment: {str(e)}")
 
-    @commands.command(name="syncroles", help="[Admin] Create all roles from roles.json and update with server IDs")
+    @commands.command(name="syncroles", help="[Admin] Sync roles from YAML file! Usage: !syncroles [filename]")
     @commands.has_permissions(administrator=True)
-    async def syncroles(self, ctx: commands.Context):
-        """Create all roles from roles.json and update the file with actual server IDs"""
+    async def syncroles(self, ctx: commands.Context, yaml_file: str = "roles.yaml"):
+        """
+        Create and sync roles from a YAML configuration file.
+        Creates roles with specified properties, then exports the mapping to roles.json
+
+        Usage: !syncroles [filename]
+        Example: !syncroles roles.yaml
+        Default: roles.yaml
+        """
         try:
             async with ctx.typing():
-                # Load the roles.json file
-                roles_config_path = self.role_assigner.roles_config_path
-                with open(roles_config_path, 'r') as f:
-                    roles_config = json.load(f)
+                # Construct path to YAML file
+                config_dir = Path(__file__).parent.parent / "config"
+                yaml_path = config_dir / yaml_file
+                output_json = config_dir / "roles.json"
 
-                created_roles = []
-                updated_roles = []
-                existing_roles = []
+                # Check if YAML file exists
+                if not yaml_path.exists():
+                    await ctx.send(f"❌ Error: Configuration file `{yaml_file}` not found in config directory!")
+                    return
 
-                # Process each role in the config
-                for role_name in roles_config.keys():
-                    # Check if role already exists on the server
-                    existing_role = discord.utils.get(ctx.guild.roles, name=role_name)
+                # Load YAML configuration
+                with open(yaml_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
 
-                    if existing_role:
-                        # Role exists, update the JSON with the correct ID
-                        if roles_config[role_name] != existing_role.id:
-                            roles_config[role_name] = existing_role.id
-                            updated_roles.append(f"{role_name} (ID: {existing_role.id})")
-                        else:
-                            existing_roles.append(role_name)
-                    else:
-                        # Role doesn't exist, create it
+                if not config or 'role_categories' not in config:
+                    await ctx.send(f"❌ Error: Configuration file is empty or invalid!")
+                    return
+
+                # Send initial status message
+                status_msg = await ctx.send("🎭 Starting role synchronization...")
+
+                # Track statistics
+                stats = {
+                    'roles_created': 0,
+                    'roles_found': 0,
+                    'roles_updated': 0,
+                    'errors': []
+                }
+
+                # Dictionary to store role mappings
+                role_mapping = {}
+
+                # Process role categories
+                await status_msg.edit(content="🔄 Processing roles...")
+
+                for category_name, category_data in config['role_categories'].items():
+                    if 'roles' not in category_data:
+                        continue
+
+                    for role_info in category_data['roles']:
+                        role_name = role_info['name']
+                        role_color_hex = role_info.get('color', '#99AAB5')
+                        role_mentionable = role_info.get('mentionable', True)
+
+                        # Convert hex color to discord.Color
                         try:
-                            new_role = await ctx.guild.create_role(
-                                name=role_name,
-                                mentionable=True,
-                                reason="Auto-created by syncroles command"
-                            )
-                            roles_config[role_name] = new_role.id
-                            created_roles.append(f"{role_name} (ID: {new_role.id})")
-                        except discord.Forbidden:
-                            await ctx.send(f"❌ Missing permissions to create role: {role_name}")
-                            continue
-                        except Exception as e:
-                            await ctx.send(f"❌ Error creating role {role_name}: {str(e)}")
-                            continue
+                            color_int = int(role_color_hex.replace('#', ''), 16)
+                            role_color = discord.Color(color_int)
+                        except:
+                            role_color = discord.Color.default()
 
-                # Write updated config back to file
-                with open(roles_config_path, 'w') as f:
-                    json.dump(roles_config, f, indent=2)
+                        # Find existing role
+                        existing_role = discord.utils.get(ctx.guild.roles, name=role_name)
+
+                        if existing_role:
+                            # Update role properties if different
+                            needs_update = False
+                            if existing_role.color != role_color or existing_role.mentionable != role_mentionable:
+                                try:
+                                    await existing_role.edit(
+                                        color=role_color,
+                                        mentionable=role_mentionable,
+                                        reason=f"Updated by syncroles from {yaml_file}"
+                                    )
+                                    stats['roles_updated'] += 1
+                                    needs_update = True
+                                except discord.Forbidden:
+                                    stats['errors'].append(f"Missing permissions to update role: {role_name}")
+                                except Exception as e:
+                                    stats['errors'].append(f"Error updating role {role_name}: {str(e)}")
+
+                            if not needs_update:
+                                stats['roles_found'] += 1
+
+                            # Store in mapping
+                            role_mapping[role_name] = existing_role.id
+                        else:
+                            # Create new role
+                            try:
+                                new_role = await ctx.guild.create_role(
+                                    name=role_name,
+                                    color=role_color,
+                                    mentionable=role_mentionable,
+                                    reason=f"Auto-created by syncroles from {yaml_file}"
+                                )
+                                stats['roles_created'] += 1
+                                role_mapping[role_name] = new_role.id
+
+                            except discord.Forbidden:
+                                stats['errors'].append(f"Missing permissions to create role: {role_name}")
+                                continue
+                            except Exception as e:
+                                stats['errors'].append(f"Error creating role {role_name}: {str(e)}")
+                                continue
+
+                # Save role mapping to JSON
+                await status_msg.edit(content="💾 Saving role mappings...")
+                with open(output_json, 'w', encoding='utf-8') as f:
+                    json.dump(role_mapping, f, indent=2)
 
                 # Reload the role mappings in the role assigner
                 self.role_assigner.reload_role_mappings()
 
-                # Create summary embed
+                # Create detailed summary embed
+                embed_color = discord.Color.orange() if stats['errors'] else discord.Color.green()
                 embed = discord.Embed(
-                    title="🔄 Role Synchronization Complete",
-                    color=discord.Color.green()
+                    title="🎭 Role Synchronization Complete",
+                    description=f"Processed {len(role_mapping)} roles from `{yaml_file}`",
+                    color=embed_color
                 )
 
-                if created_roles:
+                if stats['roles_created'] > 0:
                     embed.add_field(
-                        name=f"✨ Created Roles ({len(created_roles)})",
-                        value="\n".join(created_roles),
+                        name=f"✨ Created ({stats['roles_created']})",
+                        value="New roles created on server",
+                        inline=True
+                    )
+
+                if stats['roles_updated'] > 0:
+                    embed.add_field(
+                        name=f"📝 Updated ({stats['roles_updated']})",
+                        value="Role properties updated",
+                        inline=True
+                    )
+
+                if stats['roles_found'] > 0:
+                    embed.add_field(
+                        name=f"✅ Already Synced ({stats['roles_found']})",
+                        value="Roles already up-to-date",
+                        inline=True
+                    )
+
+                if stats['errors']:
+                    error_text = "\n".join(stats['errors'][:5])
+                    if len(stats['errors']) > 5:
+                        error_text += f"\n... and {len(stats['errors']) - 5} more errors"
+                    embed.add_field(
+                        name=f"⚠️ Errors ({len(stats['errors'])})",
+                        value=error_text,
                         inline=False
                     )
 
-                if updated_roles:
-                    embed.add_field(
-                        name=f"📝 Updated IDs ({len(updated_roles)})",
-                        value="\n".join(updated_roles),
-                        inline=False
-                    )
+                embed.add_field(
+                    name="📋 Files Updated",
+                    value=f"✅ `roles.json` - Role name to ID mappings\n✅ Loaded from `{yaml_file}`",
+                    inline=False
+                )
 
-                if existing_roles:
-                    embed.add_field(
-                        name=f"✅ Already Synced ({len(existing_roles)})",
-                        value=", ".join(existing_roles),
-                        inline=False
-                    )
-
-                if not created_roles and not updated_roles:
-                    embed.description = "All roles were already synced with the server!"
-                else:
-                    embed.description = f"Synced {len(created_roles) + len(updated_roles)} roles with the server."
-
-                embed.set_footer(text="roles.json has been updated with current server role IDs")
+                embed.set_footer(text=f"Total: {stats['roles_created']} created, {stats['roles_updated']} updated, {stats['roles_found']} unchanged")
+                await status_msg.delete()
                 await ctx.send(embed=embed)
 
         except FileNotFoundError:
-            await ctx.send(f"❌ Error: roles.json not found at {roles_config_path}")
+            await ctx.send(f"❌ Error: {yaml_file} not found in config directory")
+        except yaml.YAMLError as e:
+            await ctx.send(f"❌ Error: Invalid YAML in {yaml_file}\n```{str(e)}```")
         except json.JSONDecodeError:
-            await ctx.send(f"❌ Error: roles.json contains invalid JSON")
+            await ctx.send(f"❌ Error: Could not write to roles.json")
         except Exception as e:
             await ctx.send(f"❌ Error syncing roles: {str(e)}")
+
+    @commands.command(name="syncchannels", help="[Admin] Sync channels from YAML file! Usage: !syncchannels [filename]")
+    @commands.has_permissions(administrator=True)
+    async def syncchannels(self, ctx: commands.Context, yaml_file: str = "channels.yaml"):
+        """
+        Create and sync channels from a YAML configuration file.
+        Creates categories and channels, then exports the mapping to current_channels.json
+
+        Usage: !syncchannels [filename]
+        Example: !syncchannels channels_minimal_test.yaml
+        Default: channels.yaml
+        """
+        try:
+            async with ctx.typing():
+                # Construct path to YAML file
+                config_dir = Path(__file__).parent.parent / "config"
+                yaml_path = config_dir / yaml_file
+                output_json = config_dir / "current_channels.json"
+
+                # Check if YAML file exists
+                if not yaml_path.exists():
+                    await ctx.send(f"❌ Error: Configuration file `{yaml_file}` not found in config directory!")
+                    return
+
+                # Load YAML configuration
+                with open(yaml_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+
+                if not config:
+                    await ctx.send(f"❌ Error: Configuration file is empty or invalid!")
+                    return
+
+                # Send initial status message
+                status_msg = await ctx.send("🚀 Starting channel synchronization...")
+
+                # Track statistics
+                stats = {
+                    'categories_created': 0,
+                    'categories_found': 0,
+                    'channels_created': 0,
+                    'channels_found': 0,
+                    'channels_updated': 0,
+                    'errors': []
+                }
+
+                # Dictionary to store channel mappings
+                channel_mapping = {}
+
+                # Process categories
+                if 'categories' in config:
+                    await status_msg.edit(content="🔄 Processing categories and channels...")
+
+                    for category_name, category_data in config['categories'].items():
+                        # Find or create category
+                        category = discord.utils.get(ctx.guild.categories, name=category_name)
+
+                        if not category:
+                            try:
+                                category = await ctx.guild.create_category(
+                                    name=category_name,
+                                    reason=f"Auto-created by syncchannels command from {yaml_file}"
+                                )
+                                stats['categories_created'] += 1
+                            except discord.Forbidden:
+                                stats['errors'].append(f"Missing permissions to create category: {category_name}")
+                                continue
+                            except Exception as e:
+                                stats['errors'].append(f"Error creating category {category_name}: {str(e)}")
+                                continue
+                        else:
+                            stats['categories_found'] += 1
+
+                        # Process channels in this category
+                        if 'channels' in category_data:
+                            for channel_info in category_data['channels']:
+                                channel_name = channel_info['name']
+                                channel_type = channel_info.get('type', 'text')
+                                channel_desc = channel_info.get('description', '')
+
+                                # Find existing channel
+                                if channel_type == 'voice':
+                                    existing_channel = discord.utils.get(category.voice_channels, name=channel_name)
+                                else:
+                                    existing_channel = discord.utils.get(category.text_channels, name=channel_name)
+
+                                if existing_channel:
+                                    # Update description if different
+                                    if channel_type == 'text' and existing_channel.topic != channel_desc:
+                                        try:
+                                            await existing_channel.edit(topic=channel_desc)
+                                            stats['channels_updated'] += 1
+                                        except:
+                                            pass
+
+                                    stats['channels_found'] += 1
+                                    # Store in mapping (remove emojis and special characters for key)
+                                    clean_name = ''.join(c for c in channel_name if c.isalnum() or c in ['-', '_']).strip('-_').lower()
+                                    channel_mapping[clean_name] = existing_channel.id
+                                else:
+                                    # Create new channel
+                                    try:
+                                        if channel_type == 'voice':
+                                            new_channel = await category.create_voice_channel(
+                                                name=channel_name,
+                                                reason=f"Auto-created by syncchannels from {yaml_file}"
+                                            )
+                                        else:
+                                            new_channel = await category.create_text_channel(
+                                                name=channel_name,
+                                                topic=channel_desc,
+                                                reason=f"Auto-created by syncchannels from {yaml_file}"
+                                            )
+
+                                        stats['channels_created'] += 1
+                                        # Store in mapping
+                                        clean_name = ''.join(c for c in channel_name if c.isalnum() or c in ['-', '_']).strip('-_').lower()
+                                        channel_mapping[clean_name] = new_channel.id
+
+                                    except discord.Forbidden:
+                                        stats['errors'].append(f"Missing permissions to create channel: {channel_name}")
+                                        continue
+                                    except Exception as e:
+                                        stats['errors'].append(f"Error creating channel {channel_name}: {str(e)}")
+                                        continue
+
+                # Process standalone channels (no category)
+                if 'standalone' in config:
+                    await status_msg.edit(content="🔄 Processing standalone channels...")
+
+                    for channel_info in config['standalone']:
+                        channel_name = channel_info['name']
+                        channel_type = channel_info.get('type', 'text')
+                        channel_desc = channel_info.get('description', '')
+
+                        # Find existing channel (without category)
+                        if channel_type == 'voice':
+                            existing_channel = discord.utils.get(
+                                [ch for ch in ctx.guild.voice_channels if ch.category is None],
+                                name=channel_name
+                            )
+                        else:
+                            existing_channel = discord.utils.get(
+                                [ch for ch in ctx.guild.text_channels if ch.category is None],
+                                name=channel_name
+                            )
+
+                        if existing_channel:
+                            # Update description if different
+                            if channel_type == 'text' and existing_channel.topic != channel_desc:
+                                try:
+                                    await existing_channel.edit(topic=channel_desc)
+                                    stats['channels_updated'] += 1
+                                except:
+                                    pass
+
+                            stats['channels_found'] += 1
+                            clean_name = ''.join(c for c in channel_name if c.isalnum() or c in ['-', '_']).strip('-_').lower()
+                            channel_mapping[clean_name] = existing_channel.id
+                        else:
+                            # Create new channel
+                            try:
+                                if channel_type == 'voice':
+                                    new_channel = await ctx.guild.create_voice_channel(
+                                        name=channel_name,
+                                        reason=f"Auto-created by syncchannels from {yaml_file}"
+                                    )
+                                else:
+                                    new_channel = await ctx.guild.create_text_channel(
+                                        name=channel_name,
+                                        topic=channel_desc,
+                                        reason=f"Auto-created by syncchannels from {yaml_file}"
+                                    )
+
+                                stats['channels_created'] += 1
+                                clean_name = ''.join(c for c in channel_name if c.isalnum() or c in ['-', '_']).strip('-_').lower()
+                                channel_mapping[clean_name] = new_channel.id
+
+                            except discord.Forbidden:
+                                stats['errors'].append(f"Missing permissions to create channel: {channel_name}")
+                                continue
+                            except Exception as e:
+                                stats['errors'].append(f"Error creating channel {channel_name}: {str(e)}")
+                                continue
+
+                # Save channel mapping to JSON
+                await status_msg.edit(content="💾 Saving channel mappings...")
+                with open(output_json, 'w', encoding='utf-8') as f:
+                    json.dump(channel_mapping, f, indent=2)
+
+                # Create detailed summary embed
+                embed = discord.Embed(
+                    title="🌌 Channel Synchronization Complete",
+                    color=discord.Color.blue()
+                )
+
+                # Categories summary
+                if stats['categories_created'] > 0 or stats['categories_found'] > 0:
+                    cat_summary = []
+                    if stats['categories_created'] > 0:
+                        cat_summary.append(f"✨ Created: {stats['categories_created']}")
+                    if stats['categories_found'] > 0:
+                        cat_summary.append(f"✅ Found: {stats['categories_found']}")
+                    embed.add_field(
+                        name="📁 Categories",
+                        value=" | ".join(cat_summary),
+                        inline=False
+                    )
+
+                # Channels summary
+                channel_summary = []
+                if stats['channels_created'] > 0:
+                    channel_summary.append(f"✨ Created: {stats['channels_created']}")
+                if stats['channels_found'] > 0:
+                    channel_summary.append(f"✅ Found: {stats['channels_found']}")
+                if stats['channels_updated'] > 0:
+                    channel_summary.append(f"📝 Updated: {stats['channels_updated']}")
+
+                embed.add_field(
+                    name="📺 Channels",
+                    value=" | ".join(channel_summary) if channel_summary else "No changes",
+                    inline=False
+                )
+
+                # Total synced channels
+                total_synced = len(channel_mapping)
+                embed.add_field(
+                    name="💾 Channel Mapping",
+                    value=f"Saved {total_synced} channel IDs to `current_channels.json`",
+                    inline=False
+                )
+
+                # Errors (if any)
+                if stats['errors']:
+                    error_text = "\n".join(stats['errors'][:5])  # Show first 5 errors
+                    if len(stats['errors']) > 5:
+                        error_text += f"\n... and {len(stats['errors']) - 5} more errors"
+                    embed.add_field(
+                        name=f"⚠️ Errors ({len(stats['errors'])})",
+                        value=error_text,
+                        inline=False
+                    )
+                    embed.color = discord.Color.orange()
+
+                embed.set_footer(text=f"Configuration: {yaml_file}")
+
+                await status_msg.delete()
+                await ctx.send(embed=embed)
+
+        except FileNotFoundError:
+            await ctx.send(f"❌ Error: Configuration file `{yaml_file}` not found!")
+        except yaml.YAMLError as e:
+            await ctx.send(f"❌ Error parsing YAML file: {str(e)}")
+        except Exception as e:
+            await ctx.send(f"❌ Unexpected error during channel sync: {str(e)}")
 
 
 async def setup(bot: commands.Bot):

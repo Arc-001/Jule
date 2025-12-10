@@ -41,12 +41,6 @@ class FunCommands(commands.Cog):
         result = random.randint(1, sides)
         await ctx.send(f"🎲 You rolled a {result}!")
 
-    @commands.command(name="flip", help="Flip a coin!")
-    async def flip(self, ctx: commands.Context):
-        """Flip a coin"""
-        result = random.choice(["Heads", "Tails"])
-        await ctx.send(f"🪙 The coin landed on: **{result}**!")
-
     @commands.command(name="8ball", help="Ask the magic 8-ball a question!")
     async def eightball(self, ctx: commands.Context, *, question: Optional[str] = None):
         """Ask the magic 8-ball"""

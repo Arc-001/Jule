@@ -1,0 +1,251 @@
+# Role Configuration Template
+# This file defines the role structure for your Discord server
+# Run !syncroles to create/sync these roles with your server
+
+# Role categories help organize roles
+role_categories:
+  # Professional & Creative Roles
+  "professional":
+    description: "Career and professional interests"
+    roles:
+      - name: "developer"
+        color: "#5865F2"
+        mentionable: true
+        
+      - name: "designer"
+        color: "#EB459E"
+        mentionable: true
+        
+      - name: "programmer"
+        color: "#5865F2"
+        mentionable: true
+        
+      - name: "content creator"
+        color: "#F26522"
+        mentionable: true
+        
+      - name: "writer"
+        color: "#99AAB5"
+        mentionable: true
+        
+      - name: "artist"
+        color: "#E91E63"
+        mentionable: true
+        
+      - name: "photographer"
+        color: "#9B59B6"
+        mentionable: true
+        
+      - name: "videographer"
+        color: "#E74C3C"
+        mentionable: true
+        
+      - name: "animator"
+        color: "#3498DB"
+        mentionable: true
+        
+      - name: "musician"
+        color: "#1ABC9C"
+        mentionable: true
+        
+      - name: "podcaster"
+        color: "#F39C12"
+        mentionable: true
+        
+      - name: "blogger"
+        color: "#95A5A6"
+        mentionable: true
+        
+      - name: "streamer"
+        color: "#9146FF"
+        mentionable: true
+
+  # Hobbies & Interests
+  "hobbies":
+    description: "Hobbies and interests"
+    roles:
+      - name: "gamer"
+        color: "#206694"
+        mentionable: true
+        
+      - name: "reader"
+        color: "#607D8B"
+        mentionable: true
+        
+      - name: "movie enthusiast"
+        color: "#FF5722"
+        mentionable: true
+        
+      - name: "anime fan"
+        color: "#FF4081"
+        mentionable: true
+        
+      - name: "cook"
+        color: "#FF9800"
+        mentionable: true
+        
+      - name: "gardener"
+        color: "#4CAF50"
+        mentionable: true
+        
+      - name: "pet lover"
+        color: "#FFC107"
+        mentionable: true
+        
+      - name: "traveler"
+        color: "#00BCD4"
+        mentionable: true
+        
+      - name: "cosplayer"
+        color: "#E91E63"
+        mentionable: true
+
+  # Lifestyle & Activities
+  "lifestyle":
+    description: "Lifestyle and activity roles"
+    roles:
+      - name: "fitness enthusiast"
+        color: "#F44336"
+        mentionable: true
+        
+      - name: "yoga practitioner"
+        color: "#8BC34A"
+        mentionable: true
+        
+      - name: "athlete"
+        color: "#FF5722"
+        mentionable: true
+        
+      - name: "cyclist"
+        color: "#009688"
+        mentionable: true
+        
+      - name: "hiker"
+        color: "#795548"
+        mentionable: true
+        
+      - name: "dancer"
+        color: "#E91E63"
+        mentionable: true
+        
+      - name: "singer"
+        color: "#9C27B0"
+        mentionable: true
+
+  # Education & Tech
+  "education_tech":
+    description: "Education and technology roles"
+    roles:
+      - name: "student"
+        color: "#3F51B5"
+        mentionable: true
+        
+      - name: "tech enthusiast"
+        color: "#00BCD4"
+        mentionable: true
+
+  # Age Groups
+  "age_groups":
+    description: "Age range roles"
+    roles:
+      - name: "18-21"
+        color: "#99AAB5"
+        mentionable: false
+        
+      - name: "21-24"
+        color: "#99AAB5"
+        mentionable: false
+        
+      - name: "24-27"
+        color: "#99AAB5"
+        mentionable: false
+        
+      - name: "27-30"
+        color: "#99AAB5"
+        mentionable: false
+        
+      - name: "30-35"
+        color: "#99AAB5"
+        mentionable: false
+        
+      - name: "35-40"
+        color: "#99AAB5"
+        mentionable: false
+        
+      - name: "40-45"
+        color: "#99AAB5"
+        mentionable: false
+        
+      - name: "45+"
+        color: "#99AAB5"
+        mentionable: false
+
+  # Gender Identity
+  "gender_identity":
+    description: "Gender identity roles"
+    roles:
+      - name: "male"
+        color: "#3498DB"
+        mentionable: false
+        
+      - name: "female"
+        color: "#E91E63"
+        mentionable: false
+        
+      - name: "non-binary"
+        color: "#FFC107"
+        mentionable: false
+
+  # Pronouns
+  "pronouns":
+    description: "Pronoun preference roles"
+    roles:
+      - name: "he/him"
+        color: "#5DADE2"
+        mentionable: false
+        
+      - name: "she/her"
+        color: "#EC7063"
+        mentionable: false
+        
+      - name: "they/them"
+        color: "#F4D03F"
+        mentionable: false
+        
+      - name: "any pronouns"
+        color: "#82E0AA"
+        mentionable: false
+
+  # Location/Region
+  "regions":
+    description: "Geographic region roles"
+    roles:
+      - name: "north america"
+        color: "#95A5A6"
+        mentionable: false
+        
+      - name: "south america"
+        color: "#95A5A6"
+        mentionable: false
+        
+      - name: "europe"
+        color: "#95A5A6"
+        mentionable: false
+        
+      - name: "asia"
+        color: "#95A5A6"
+        mentionable: false
+        
+      - name: "africa"
+        color: "#95A5A6"
+        mentionable: false
+        
+      - name: "oceania"
+        color: "#95A5A6"
+        mentionable: false
+
+# Note: When you run !syncroles, it will:
+# 1. Read this YAML template to get role definitions
+# 2. Create any missing roles on the server with the specified properties
+# 3. Update roles.json with the name-to-ID mappings for quick lookups
+

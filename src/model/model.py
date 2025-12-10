@@ -85,6 +85,7 @@ class ServerSettings(Base):
     spam_timeframe = Column(Integer, default=20)
     welcome_channel_id = Column(BigInteger, nullable=True)
     default_role_id = Column(BigInteger, nullable=True)
+    intro_channel_id = Column(BigInteger, nullable=True)
     settings_updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
@@ -109,6 +110,88 @@ class UserMusicStats(Base):
     total_listening_time = Column(BigInteger, default=0)  # Total time in seconds
     favorite_song = Column(String(500), nullable=True)
     last_played_at = Column(DateTime, nullable=True)
+    last_updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class GameStats(Base):
+    __tablename__ = 'game_stats'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, nullable=False)
+    game_type = Column(String(50), nullable=False)  # 'trivia', 'rps', 'guess', 'scramble', etc.
+    result = Column(String(20), nullable=False)  # 'win', 'loss', 'tie'
+    points_earned = Column(Integer, default=0)
+    difficulty = Column(String(20), nullable=True)  # For games with difficulty levels
+    genre = Column(String(100), nullable=True)  # For trivia genre
+    score = Column(Integer, nullable=True)  # For games with numeric scores
+    details = Column(Text, nullable=True)  # JSON string for additional data
+    played_at = Column(DateTime, default=datetime.utcnow)
+    guild_id = Column(BigInteger, nullable=True)
+
+
+class UserGameStats(Base):
+    __tablename__ = 'user_game_stats'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, nullable=False)
+    game_type = Column(String(50), nullable=False)
+
+    # Overall stats
+    total_played = Column(Integer, default=0)
+    total_wins = Column(Integer, default=0)
+    total_losses = Column(Integer, default=0)
+    total_ties = Column(Integer, default=0)
+    total_points_earned = Column(Integer, default=0)
+
+    # Streaks
+    current_win_streak = Column(Integer, default=0)
+    best_win_streak = Column(Integer, default=0)
+
+    # Averages
+    average_score = Column(Float, nullable=True)
+
+    # Best performance
+    highest_score = Column(Integer, nullable=True)
+
+    # Timestamps
+    first_played = Column(DateTime, default=datetime.utcnow)
+    last_played = Column(DateTime, default=datetime.utcnow)
+    last_updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class TriviaStats(Base):
+    __tablename__ = 'trivia_stats'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, nullable=False)
+
+    # Overall trivia stats
+    total_questions = Column(Integer, default=0)
+    correct_answers = Column(Integer, default=0)
+    wrong_answers = Column(Integer, default=0)
+    total_points = Column(Integer, default=0)
+
+    # By difficulty
+    easy_correct = Column(Integer, default=0)
+    easy_total = Column(Integer, default=0)
+    medium_correct = Column(Integer, default=0)
+    medium_total = Column(Integer, default=0)
+    hard_correct = Column(Integer, default=0)
+    hard_total = Column(Integer, default=0)
+    expert_correct = Column(Integer, default=0)
+    expert_total = Column(Integer, default=0)
+
+    # Competition stats
+    competitions_completed = Column(Integer, default=0)
+    competitions_perfect = Column(Integer, default=0)
+    best_competition_score = Column(Integer, default=0)
+
+    # Streaks
+    current_streak = Column(Integer, default=0)
+    best_streak = Column(Integer, default=0)
+
+    # Timestamps
+    last_played = Column(DateTime, nullable=True)
     last_updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
@@ -364,20 +447,22 @@ class Database:
                     'spam_threshold': settings.spam_threshold,
                     'spam_timeframe': settings.spam_timeframe,
                     'welcome_channel_id': settings.welcome_channel_id,
-                    'default_role_id': settings.default_role_id
+                    'default_role_id': settings.default_role_id,
+                    'intro_channel_id': settings.intro_channel_id
                 }
             return {
                 'spam_threshold': 5,
                 'spam_timeframe': 20,
                 'welcome_channel_id': None,
-                'default_role_id': None
+                'default_role_id': None,
+                'intro_channel_id': None
             }
         finally:
             session.close()
 
     def update_server_settings(self, guild_id: int, **settings):
         """Update server settings"""
-        valid_keys = ['spam_threshold', 'spam_timeframe', 'welcome_channel_id', 'default_role_id']
+        valid_keys = ['spam_threshold', 'spam_timeframe', 'welcome_channel_id', 'default_role_id', 'intro_channel_id']
         updates = {k: v for k, v in settings.items() if k in valid_keys}
 
         if not updates:
@@ -571,6 +656,319 @@ class Database:
                 }
                 for user in users
             }
+        finally:
+            session.close()
+
+    # ============= GAME STATS =============
+
+    def log_game_result(self, user_id: int, game_type: str, result: str,
+                       points_earned: int = 0, difficulty: Optional[str] = None,
+                       genre: Optional[str] = None, score: Optional[int] = None,
+                       details: Optional[str] = None, guild_id: Optional[int] = None):
+        """Log a game result"""
+        session = self.get_session()
+        try:
+            # Add to game stats log
+            game_stat = GameStats(
+                user_id=user_id,
+                game_type=game_type,
+                result=result,
+                points_earned=points_earned,
+                difficulty=difficulty,
+                genre=genre,
+                score=score,
+                details=details,
+                guild_id=guild_id
+            )
+            session.add(game_stat)
+
+            # Update user game stats
+            user_game_stat = session.query(UserGameStats).filter_by(
+                user_id=user_id,
+                game_type=game_type
+            ).first()
+
+            if user_game_stat:
+                user_game_stat.total_played += 1
+                if result == 'win':
+                    user_game_stat.total_wins += 1
+                    user_game_stat.current_win_streak += 1
+                    if user_game_stat.current_win_streak > user_game_stat.best_win_streak:
+                        user_game_stat.best_win_streak = user_game_stat.current_win_streak
+                elif result == 'loss':
+                    user_game_stat.total_losses += 1
+                    user_game_stat.current_win_streak = 0
+                elif result == 'tie':
+                    user_game_stat.total_ties += 1
+
+                user_game_stat.total_points_earned += points_earned
+                user_game_stat.last_played = datetime.utcnow()
+
+                # Update score stats if provided
+                if score is not None:
+                    # Update average
+                    total_scores = (user_game_stat.average_score or 0) * (user_game_stat.total_played - 1) + score
+                    user_game_stat.average_score = total_scores / user_game_stat.total_played
+
+                    # Update highest score
+                    if user_game_stat.highest_score is None or score > user_game_stat.highest_score:
+                        user_game_stat.highest_score = score
+            else:
+                user_game_stat = UserGameStats(
+                    user_id=user_id,
+                    game_type=game_type,
+                    total_played=1,
+                    total_wins=1 if result == 'win' else 0,
+                    total_losses=1 if result == 'loss' else 0,
+                    total_ties=1 if result == 'tie' else 0,
+                    total_points_earned=points_earned,
+                    current_win_streak=1 if result == 'win' else 0,
+                    best_win_streak=1 if result == 'win' else 0,
+                    average_score=float(score) if score is not None else None,
+                    highest_score=score,
+                    last_played=datetime.utcnow()
+                )
+                session.add(user_game_stat)
+
+            session.commit()
+        finally:
+            session.close()
+
+    def get_user_game_stats(self, user_id: int, game_type: Optional[str] = None) -> Dict:
+        """Get game statistics for a user"""
+        session = self.get_session()
+        try:
+            if game_type:
+                stats = session.query(UserGameStats).filter_by(
+                    user_id=user_id,
+                    game_type=game_type
+                ).first()
+
+                if stats:
+                    return {
+                        'game_type': stats.game_type,
+                        'total_played': stats.total_played,
+                        'total_wins': stats.total_wins,
+                        'total_losses': stats.total_losses,
+                        'total_ties': stats.total_ties,
+                        'total_points': stats.total_points_earned,
+                        'win_rate': (stats.total_wins / stats.total_played * 100) if stats.total_played > 0 else 0,
+                        'current_streak': stats.current_win_streak,
+                        'best_streak': stats.best_win_streak,
+                        'average_score': stats.average_score,
+                        'highest_score': stats.highest_score,
+                        'first_played': stats.first_played,
+                        'last_played': stats.last_played
+                    }
+                return {}
+            else:
+                # Get all game stats for user
+                all_stats = session.query(UserGameStats).filter_by(user_id=user_id).all()
+                return {
+                    stat.game_type: {
+                        'total_played': stat.total_played,
+                        'total_wins': stat.total_wins,
+                        'total_losses': stat.total_losses,
+                        'total_ties': stat.total_ties,
+                        'total_points': stat.total_points_earned,
+                        'win_rate': (stat.total_wins / stat.total_played * 100) if stat.total_played > 0 else 0,
+                        'current_streak': stat.current_win_streak,
+                        'best_streak': stat.best_win_streak,
+                        'average_score': stat.average_score,
+                        'highest_score': stat.highest_score,
+                        'last_played': stat.last_played
+                    }
+                    for stat in all_stats
+                }
+        finally:
+            session.close()
+
+    def get_game_leaderboard(self, game_type: str, stat_type: str = 'wins', limit: int = 10) -> List[Tuple[int, int]]:
+        """Get game leaderboard by stat type"""
+        session = self.get_session()
+        try:
+            query = session.query(UserGameStats).filter_by(game_type=game_type)
+
+            if stat_type == 'wins':
+                query = query.order_by(UserGameStats.total_wins.desc())
+            elif stat_type == 'played':
+                query = query.order_by(UserGameStats.total_played.desc())
+            elif stat_type == 'points':
+                query = query.order_by(UserGameStats.total_points_earned.desc())
+            elif stat_type == 'streak':
+                query = query.order_by(UserGameStats.best_win_streak.desc())
+            elif stat_type == 'score':
+                query = query.order_by(UserGameStats.highest_score.desc())
+
+            stats = query.limit(limit).all()
+
+            if stat_type == 'wins':
+                return [(stat.user_id, stat.total_wins) for stat in stats]
+            elif stat_type == 'played':
+                return [(stat.user_id, stat.total_played) for stat in stats]
+            elif stat_type == 'points':
+                return [(stat.user_id, stat.total_points_earned) for stat in stats]
+            elif stat_type == 'streak':
+                return [(stat.user_id, stat.best_win_streak) for stat in stats]
+            elif stat_type == 'score':
+                return [(stat.user_id, stat.highest_score or 0) for stat in stats]
+
+            return []
+        finally:
+            session.close()
+
+    # ============= TRIVIA STATS =============
+
+    def log_trivia_answer(self, user_id: int, correct: bool, difficulty: str, points: int = 0):
+        """Log a trivia answer"""
+        session = self.get_session()
+        try:
+            stats = session.query(TriviaStats).filter_by(user_id=user_id).first()
+
+            if stats:
+                stats.total_questions += 1
+                if correct:
+                    stats.correct_answers += 1
+                    stats.current_streak += 1
+                    if stats.current_streak > stats.best_streak:
+                        stats.best_streak = stats.current_streak
+                else:
+                    stats.wrong_answers += 1
+                    stats.current_streak = 0
+
+                stats.total_points += points
+
+                # Update difficulty-specific stats
+                if difficulty == 'easy':
+                    stats.easy_total += 1
+                    if correct:
+                        stats.easy_correct += 1
+                elif difficulty == 'medium':
+                    stats.medium_total += 1
+                    if correct:
+                        stats.medium_correct += 1
+                elif difficulty == 'hard':
+                    stats.hard_total += 1
+                    if correct:
+                        stats.hard_correct += 1
+                elif difficulty == 'expert':
+                    stats.expert_total += 1
+                    if correct:
+                        stats.expert_correct += 1
+
+                stats.last_played = datetime.utcnow()
+                stats.last_updated = datetime.utcnow()
+            else:
+                stats = TriviaStats(
+                    user_id=user_id,
+                    total_questions=1,
+                    correct_answers=1 if correct else 0,
+                    wrong_answers=0 if correct else 1,
+                    total_points=points,
+                    current_streak=1 if correct else 0,
+                    best_streak=1 if correct else 0,
+                    last_played=datetime.utcnow()
+                )
+
+                # Set difficulty-specific stats
+                if difficulty == 'easy':
+                    stats.easy_total = 1
+                    stats.easy_correct = 1 if correct else 0
+                elif difficulty == 'medium':
+                    stats.medium_total = 1
+                    stats.medium_correct = 1 if correct else 0
+                elif difficulty == 'hard':
+                    stats.hard_total = 1
+                    stats.hard_correct = 1 if correct else 0
+                elif difficulty == 'expert':
+                    stats.expert_total = 1
+                    stats.expert_correct = 1 if correct else 0
+
+                session.add(stats)
+
+            session.commit()
+        finally:
+            session.close()
+
+    def log_trivia_competition(self, user_id: int, correct: int, total: int,
+                               points: int, difficulty: str):
+        """Log a completed trivia competition"""
+        session = self.get_session()
+        try:
+            stats = session.query(TriviaStats).filter_by(user_id=user_id).first()
+
+            if stats:
+                stats.competitions_completed += 1
+                if correct == total:
+                    stats.competitions_perfect += 1
+                if points > stats.best_competition_score:
+                    stats.best_competition_score = points
+                stats.last_updated = datetime.utcnow()
+            else:
+                stats = TriviaStats(
+                    user_id=user_id,
+                    competitions_completed=1,
+                    competitions_perfect=1 if correct == total else 0,
+                    best_competition_score=points
+                )
+                session.add(stats)
+
+            session.commit()
+        finally:
+            session.close()
+
+    def get_trivia_stats(self, user_id: int) -> Optional[Dict]:
+        """Get trivia statistics for a user"""
+        session = self.get_session()
+        try:
+            stats = session.query(TriviaStats).filter_by(user_id=user_id).first()
+
+            if stats:
+                return {
+                    'total_questions': stats.total_questions,
+                    'correct_answers': stats.correct_answers,
+                    'wrong_answers': stats.wrong_answers,
+                    'accuracy': (stats.correct_answers / stats.total_questions * 100) if stats.total_questions > 0 else 0,
+                    'total_points': stats.total_points,
+                    'easy_accuracy': (stats.easy_correct / stats.easy_total * 100) if stats.easy_total > 0 else 0,
+                    'medium_accuracy': (stats.medium_correct / stats.medium_total * 100) if stats.medium_total > 0 else 0,
+                    'hard_accuracy': (stats.hard_correct / stats.hard_total * 100) if stats.hard_total > 0 else 0,
+                    'expert_accuracy': (stats.expert_correct / stats.expert_total * 100) if stats.expert_total > 0 else 0,
+                    'competitions_completed': stats.competitions_completed,
+                    'competitions_perfect': stats.competitions_perfect,
+                    'best_competition_score': stats.best_competition_score,
+                    'current_streak': stats.current_streak,
+                    'best_streak': stats.best_streak,
+                    'last_played': stats.last_played
+                }
+            return None
+        finally:
+            session.close()
+
+    def get_trivia_leaderboard(self, stat_type: str = 'accuracy', limit: int = 10) -> List[Tuple[int, float]]:
+        """Get trivia leaderboard"""
+        session = self.get_session()
+        try:
+            stats = session.query(TriviaStats).filter(TriviaStats.total_questions > 0).all()
+
+            if stat_type == 'accuracy':
+                # Calculate accuracy and sort
+                leaderboard = [(s.user_id, s.correct_answers / s.total_questions * 100)
+                              for s in stats if s.total_questions > 0]
+                leaderboard.sort(key=lambda x: x[1], reverse=True)
+            elif stat_type == 'points':
+                leaderboard = [(s.user_id, s.total_points) for s in stats]
+                leaderboard.sort(key=lambda x: x[1], reverse=True)
+            elif stat_type == 'streak':
+                leaderboard = [(s.user_id, s.best_streak) for s in stats]
+                leaderboard.sort(key=lambda x: x[1], reverse=True)
+            elif stat_type == 'competitions':
+                leaderboard = [(s.user_id, s.competitions_completed) for s in stats]
+                leaderboard.sort(key=lambda x: x[1], reverse=True)
+            else:
+                leaderboard = []
+
+            return leaderboard[:limit]
         finally:
             session.close()
 

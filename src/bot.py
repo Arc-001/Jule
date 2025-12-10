@@ -14,7 +14,7 @@ from constants import (
     GREETINGS, RANDOM_REACTIONS, RANDOM_REACTION_CHANCE, MIN_INTRO_LENGTH
 )
 from model.model import Database
-from model.services import SpamDetector, ReminderService, PointsService, BirthdayService, MusicService
+from model.services import SpamDetector, ReminderService, PointsService, BirthdayService, MusicService, GameStatsService
 from model.role_assigner import RoleAssigner
 from utils import load_json_config, get_avatar_url
 
@@ -30,6 +30,7 @@ reminder_service = ReminderService(db)
 points_service = PointsService(db)
 birthday_service = BirthdayService(db)
 music_service = MusicService(db)
+game_stats_service = GameStatsService(db)
 role_assigner = RoleAssigner(ROLES_CONFIG_PATH)
 
 # Attach services to bot for cog access
@@ -39,6 +40,7 @@ bot.reminder_service = reminder_service
 bot.points_service = points_service
 bot.birthday_service = birthday_service
 bot.music_service = music_service
+bot.game_stats_service = game_stats_service
 bot.role_assigner = role_assigner
 
 # Load channel mappings
@@ -145,7 +147,8 @@ async def load_extensions():
         'cogs.utility_commands',
         'cogs.admin_commands',
         'cogs.music_commands',
-        'cogs.ai_commands'
+        'cogs.ai_commands',
+        'cogs.template_manager'
     ]
 
     for extension in extensions:
@@ -247,8 +250,12 @@ async def on_message(message: discord.Message):
         return  # Don't process commands or award points for spam
 
     # Check if message is in intro channel and assign roles
-    if INTRO_CHANNEL_ID and message.channel.id == INTRO_CHANNEL_ID:
-        await handle_intro_message(message)
+    if message.guild:
+        server_settings = db.get_server_settings(message.guild.id)
+        intro_channel_id = server_settings.get('intro_channel_id')
+
+        if intro_channel_id and message.channel.id == intro_channel_id:
+            await handle_intro_message(message)
 
     # Track message count and award points
     points_service.increment_message(message.author.id)

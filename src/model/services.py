@@ -275,3 +275,50 @@ class MusicService:
         self.db.update_favorite_song(user_id, song_title)
 
 
+class GameStatsService:
+    """Service for managing game statistics and tracking"""
+
+    def __init__(self, db: Database):
+        self.db = db
+
+    def log_game(self, user_id: int, game_type: str, result: str,
+                 points_earned: int = 0, difficulty: Optional[str] = None,
+                 genre: Optional[str] = None, score: Optional[int] = None,
+                 details: Optional[str] = None, guild_id: Optional[int] = None):
+        """Log a game result"""
+        self.db.log_game_result(
+            user_id=user_id,
+            game_type=game_type,
+            result=result,
+            points_earned=points_earned,
+            difficulty=difficulty,
+            genre=genre,
+            score=score,
+            details=details,
+            guild_id=guild_id
+        )
+
+    def get_user_stats(self, user_id: int, game_type: Optional[str] = None) -> Dict:
+        """Get game statistics for a user"""
+        return self.db.get_user_game_stats(user_id, game_type)
+
+    def get_leaderboard(self, game_type: str, stat_type: str = 'wins', limit: int = 10) -> List[tuple]:
+        """Get game leaderboard"""
+        return self.db.get_game_leaderboard(game_type, stat_type, limit)
+
+    def log_trivia_answer(self, user_id: int, correct: bool, difficulty: str, points: int = 0):
+        """Log a trivia answer"""
+        self.db.log_trivia_answer(user_id, correct, difficulty, points)
+
+    def log_trivia_competition(self, user_id: int, correct: int, total: int,
+                               points: int, difficulty: str):
+        """Log a completed trivia competition"""
+        self.db.log_trivia_competition(user_id, correct, total, points, difficulty)
+
+    def get_trivia_stats(self, user_id: int) -> Optional[Dict]:
+        """Get trivia statistics for a user"""
+        return self.db.get_trivia_stats(user_id)
+
+    def get_trivia_leaderboard(self, stat_type: str = 'accuracy', limit: int = 10) -> List[tuple]:
+        """Get trivia leaderboard"""
+        return self.db.get_trivia_leaderboard(stat_type, limit)
