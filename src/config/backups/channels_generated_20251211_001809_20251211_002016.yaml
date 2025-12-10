@@ -1,0 +1,49 @@
+categories:
+  🚀 Launchpad:
+    channels:
+    - name: announcements
+      type: text
+      description: Critical mission updates and server news.
+    - name: welcome-dock
+      type: text
+      description: New crew members arrive here! Say hello.
+    - name: rules-of-cosmos
+      type: text
+      description: The essential guidelines for our harmonious space journey.
+  🛰️ Satellite Comms:
+    channels:
+    - name: general-chat
+      type: text
+      description: Orbiting discussions on all topics under the suns.
+    - name: star-gazing-media
+      type: text
+      description: Share your cosmic discoveries, memes, and media.
+    - name: creative-nebula
+      type: text
+      description: Showcase your artistic creations inspired by the void.
+  🎤 Astro Lounge:
+    channels:
+    - name: general-hangout
+      type: voice
+      description: Voice chat for casual crew meetups and discussions.
+    - name: music-stream
+      type: voice
+      description: Chill out to cosmic tunes and share your playlists.
+    - name: gaming-squad
+      type: voice
+      description: Coordinate your intergalactic adventures and game together.
+  🪐 Planet Play:
+    channels:
+    - name: lfg-missions
+      type: text
+      description: Looking For Group for your next space expedition.
+    - name: game-discussion
+      type: text
+      description: Chat about your favorite cosmic games and platforms.
+    - name: event-horizon
+      type: text
+      description: Plan and discuss upcoming server events and activities.
+standalone:
+- name: the-void
+  type: text
+  description: A place for random thoughts, rants, or just screaming into the void.

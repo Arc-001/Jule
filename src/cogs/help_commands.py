@@ -160,7 +160,8 @@ class CustomHelpCommand(commands.Cog):
                     "`!applychannels <file> confirm` - Apply channels template\n"
                     "`!listtemplates` - List all templates\n"
                     "`!listbackups [type]` - List backups\n"
-                    "`!reverttemplate <file> confirm` - Restore backup"
+                    "`!reverttemplate <file> confirm` - Restore backup\n"
+                    "`!activetemplate [type] [file]` - Check/set active template"
                 ),
                 inline=False
             )

@@ -3,199 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jule Bot Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Jule | Command Center</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <i class="fas fa-robot"></i>
-                <span>Jule Bot Dashboard</span>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <i class="fa-solid fa-robot logo-icon"></i>
+                <span class="logo-text">Jule<span class="highlight">OS</span></span>
             </div>
-            <div class="nav-time" id="currentTime"></div>
-        </div>
-    </nav>
+            
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="overview">
+                    <i class="fa-solid fa-grid-2"></i>
+                    <span>Overview</span>
+                </button>
+                <button class="nav-item" data-tab="leaderboard">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Leaderboard</span>
+                </button>
+                <button class="nav-item" data-tab="games">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <span>Games Area</span>
+                </button>
+                <button class="nav-item" data-tab="music">
+                    <i class="fa-solid fa-music"></i>
+                    <span>Music Hall</span>
+                </button>
+                <button class="nav-item" data-tab="logs">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Security Logs</span>
+                </button>
+            </nav>
 
-    <!-- Main Content -->
-    <div class="container">
-        <!-- Stats Overview -->
-        <section class="stats-section">
-            <h2 class="section-title">
-                <i class="fas fa-chart-line"></i> Overview
-            </h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon blue">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalUsers">-</h3>
-                        <p>Total Users</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon purple">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalPoints">-</h3>
-                        <p>Total Points</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon green">
-                        <i class="fas fa-message"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalMessages">-</h3>
-                        <p>Total Messages</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon orange">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="activeReminders">-</h3>
-                        <p>Active Reminders</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon pink">
-                        <i class="fas fa-cake-candles"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalBirthdays">-</h3>
-                        <p>Birthdays</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon red">
-                        <i class="fas fa-shield-halved"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="spamToday">-</h3>
-                        <p>Spam Today</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon cyan">
-                        <i class="fas fa-chart-simple"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="messages24h">-</h3>
-                        <p>Messages (24h)</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon yellow">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="uptime">-</h3>
-                        <p>Uptime</p>
-                    </div>
-                </div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>System Online</span>
             </div>
-        </section>
+        </aside>
 
-        <!-- Charts Section -->
-        <section class="charts-section">
-            <div class="chart-container">
-                <h2 class="section-title">
-                    <i class="fas fa-chart-area"></i> Activity (Last 7 Days)
-                </h2>
-                <canvas id="activityChart"></canvas>
-            </div>
-        </section>
-
-        <!-- Two Column Layout -->
-        <div class="two-column">
-            <!-- Leaderboard -->
-            <section class="card">
-                <h2 class="section-title">
-                    <i class="fas fa-trophy"></i> Top Users
-                </h2>
-                <div class="leaderboard" id="leaderboard">
-                    <div class="loading">Loading...</div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="current-view">
+                    <h1 id="page-title">Dashboard Overview</h1>
+                    <p id="page-subtitle">Real-time system metrics and user analytics</p>
                 </div>
-            </section>
-
-            <!-- Upcoming Birthdays -->
-            <section class="card">
-                <h2 class="section-title">
-                    <i class="fas fa-birthday-cake"></i> Upcoming Birthdays
-                </h2>
-                <div class="birthdays-list" id="birthdaysList">
-                    <div class="loading">Loading...</div>
+                <div class="actions">
+                    <button class="icon-btn" onclick="refreshData()">
+                        <i class="fa-solid fa-rotate-right" id="refresh-icon"></i>
+                    </button>
+                    <div class="user-profile">
+                        <div class="avatar-placeholder">
+                            <i class="fa-solid fa-user-astronaut"></i>
+                        </div>
+                    </div>
                 </div>
-            </section>
-        </div>
+            </header>
 
-        <!-- Birthday Calendar -->
-        <section class="calendar-section">
-            <h2 class="section-title">
-                <i class="fas fa-calendar-alt"></i> Birthday Calendar
-            </h2>
-            <div class="calendar-container" id="birthdayCalendar">
-                <div class="loading">Loading calendar...</div>
-            </div>
-        </section>
+            <!-- Views Container -->
+            <div class="views-container">
+                
+                <!-- Overview Tab -->
+                <div id="overview" class="view-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <div class="icon-box blue"><i class="fa-solid fa-users"></i></div>
+                            <div class="stat-info">
+                                <span class="label">Total Users</span>
+                                <span class="value" id="stat-users">--</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="icon-box purple"><i class="fa-solid fa-star"></i></div>
+                            <div class="stat-info">
+                                <span class="label">Points Distributed</span>
+                                <span class="value" id="stat-points">--</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="icon-box green"><i class="fa-solid fa-comments"></i></div>
+                            <div class="stat-info">
+                                <span class="label">Messages (24h)</span>
+                                <span class="value" id="stat-messages-24h">--</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="icon-box red"><i class="fa-solid fa-ban"></i></div>
+                            <div class="stat-info">
+                                <span class="label">Spam Blocked</span>
+                                <span class="value" id="stat-spam">--</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- Recent Spam Logs -->
-        <section class="logs-section">
-            <h2 class="section-title">
-                <i class="fas fa-exclamation-triangle"></i> Recent Spam Detection
-            </h2>
-            <div class="logs-container">
-                <table class="logs-table" id="spamLogs">
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Username</th>
-                            <th>Guild ID</th>
-                            <th>Message Count</th>
-                            <th>Timeframe</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="6" class="loading">Loading logs...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                    <div class="charts-row">
+                        <div class="chart-container glass big">
+                            <h3><i class="fa-solid fa-chart-line"></i> Activity Trends</h3>
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                        <div class="list-container glass small">
+                            <h3><i class="fa-solid fa-cake-candles"></i> Upcoming Birthdays</h3>
+                            <div class="birthdays-list" id="birthdays-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Reminders -->
-        <section class="reminders-section">
-            <h2 class="section-title">
-                <i class="fas fa-bell"></i> Active Reminders
-            </h2>
-            <div class="reminders-container" id="remindersList">
-                <div class="loading">Loading reminders...</div>
+                <!-- Leaderboard Tab -->
+                <div id="leaderboard" class="view-section">
+                    <div class="glass full-width">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>User</th>
+                                    <th>Points</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Games Tab -->
+                <div id="games" class="view-section">
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <div class="icon-box orange"><i class="fa-solid fa-dice"></i></div>
+                            <div class="stat-info">
+                                <span class="label">Total Games</span>
+                                <span class="value" id="game-total">--</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="icon-box yellow"><i class="fa-solid fa-trophy"></i></div>
+                            <div class="stat-info">
+                                <span class="label">Global Win Rate</span>
+                                <span class="value" id="game-winrate">--%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="charts-row mt-4">
+                        <div class="chart-container glass half">
+                            <h3>Game Popularity</h3>
+                            <canvas id="gamesChart"></canvas>
+                        </div>
+                        <div class="glass half" id="trivia-stat-box">
+                           <h3>Trivia Accuracy</h3>
+                           <div class="circular-progress" id="trivia-accuracy-circle">
+                               <span class="progress-value">0%</span>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+                
+                 <!-- Music Tab -->
+                <div id="music" class="view-section">
+                    <div class="glass full-width">
+                        <h3>Top Request Songs</h3>
+                        <div class="music-list" id="music-list"></div>
+                    </div>
+                </div>
+
+                <!-- Logs Tab -->
+                <div id="logs" class="view-section">
+                     <div class="glass full-width">
+                        <h3>Recent Security Interventions</h3>
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
-        </section>
+        </main>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>Jule Bot Dashboard © 2025 | Last updated: <span id="lastUpdated">-</span></p>
-    </footer>
-
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/charts.js"></script>
+    <script src="/static/js/main.js"></script>
 </body>
 </html>
-

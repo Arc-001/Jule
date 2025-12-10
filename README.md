@@ -1,357 +1,188 @@
-# Jule Discord Bot 
+# Jule Bot
 
-A friendly, feature-rich Discord bot with AI-powered commands, music playback, community features, and more!
+Jule is a comprehensive and robust Discord bot designed to enhance community engagement through a suite of interactive features, moderation tools, and AI-powered capabilities. Built with Python and discord.py, it serves as a reliable assistant for managing and enlivening your Discord server.
+
+## Overview
+
+This project aims to provide a powerful yet accessible experience for server members. It automates routine tasks, facilitates community interaction, and offers entertainment options, all while maintaining a user-friendly environment. The bot comes with an integrated web dashboard for easy monitoring.
+
+## Unique Features & AI Capabilities
+
+Jule sets itself apart with deep integration of Google's Gemini AI, going beyond simple chatbots to provide structural server management and intelligent content generation.
+
+### AI-Powered Template Manager
+One of Jule's most powerful features is the intelligent generation and management of server infrastructure.
+- **Generative Configuration**: The bot can design entire role hierarchies or channel layouts based on a simple text description (e.g., "Create a layout for a competitive gaming community").
+- **Zero-Touch Application**: Generated templates can be applied automatically, creating channels and roles while managing permissions.
+- **Safety First**: Includes a robust backup and restore system, ensuring you can always revert changes if needed.
+
+### Intelligent Context & Content
+- **Smart Role Assignment**: The bot analyzes introduction messages to infer user interests and assigns appropriate roles automatically, reducing manual moderation overhead.
+- **Structured Knowledge**: Unlike generic chat commands, Jule offers structured AI tools like `!debate` (generating balanced pros/cons), `!howto` (step-by-step guides), and `!quiz` (interactive learning).
+- **Conversation Engine**: Capable of generating context-aware conversation starters and brainstorming sessions to keep community channels active.
 
 ## Features
 
-### AI Commands
-- **Ask AI**: Conversational AI assistant using Google Gemini
-- **Wikipedia Integration**: Quick information lookup
-- **Explanations**: Get simple explanations of complex topics
-- **Brainstorming**: Generate creative ideas
-- **Quizzes**: Interactive quiz questions
-- **Translations**: Multi-language text translation
-- **Debates**: Generate balanced debate points
-- **And more!**
+### Community & Engagement
+- **Welcome System**: Greets new members with custom embeds and helpful server information.
+- **Birthday Tracking**: Remembers and celebrates member birthdays.
+- **Engagement Points**: Activity-based point system to reward active community members.
 
-### Music Commands
-- Play music from YouTube with search functionality
-- Queue management (add, skip, clear, shuffle)
-- Music statistics and leaderboards
-- Auto-disconnect after inactivity
+### Entertainment & Games
+- **Music Player**: Full-featured music playback system supporting queues and search (powered by Wavelink).
+- **Mini-Games**: Includes interactive games like Rock-Paper-Scissors and Number Guessing.
+- **Fun Commands**: Magic 8-Ball, random facts, and compliment generators.
 
-### Game Commands
-- Truth or Dare
-- Would You Rather
-- 8Ball predictions
-- Trivia questions
+### Utility & Moderation
+- **Spam Detection**: Automated protection against message spam with temporary warnings and cleanup.
+- **Reminders**: Custom reminder system for users.
+- **Polls**: Easy-to-create polls for community feedback.
+- **Admin Tools**: Various commands for server management and cleanup.
 
-### Fun Commands
-- Random jokes and facts
-- Compliments
-- Dad jokes
-- Memes
+### Web Dashboard
+- **Live Status**: Real-time monitoring of bot status.
+- **Logs**: Viewable logs for bot and system activities.
+- **Database Limits**: Visual representation of stored data.
 
-### Community Commands
-- User profiles and stats
-- Leaderboards
-- Birthday tracking
-- Point system
-- Introduction role assignment using AI
+## Command Reference
 
-###  Utility Commands
-- Polls with reactions
-- Reminders
-- Server information
-- User avatars
-- Birthday management
+### Fun & Games
+Interactive games and casual commands to keep the server lively.
+- `!hello`: Say hello to Jule.
+- `!roll [sides]`: Roll a dice (default 6 sides).
+- `!flip`: Flip a coin.
+- `!8ball [question]`: Ask the magic 8-ball a question.
+- `!fact`: Get a random fun fact.
+- `!compliment [@user]`: Give a compliment to yourself or someone else.
+- `!choose <option1> <option2> ...`: Let Jule choose between options.
+- `!encourage [@user]`: Send an encouraging message.
+- `!rps <rock|paper|scissors>`: Play Rock, Paper, Scissors against the bot.
+- `!guess`: Start a number guessing game (1-100).
+- `!trivia [difficulty] [genre]`: Answer a trivia question (e.g., `!trivia hard science`).
+- `!triviacomp [difficulty] [genre]`: Start a 10-question trivia competition.
+- `!triviahelp`: Detailed help for the trivia system.
+- `!triviastats [@user]`: View a user's trivia statistics.
+- `!trivialeaderboard [type]`: View trivia leaderboards.
+- `!scramble`: Unscramble a word for points.
 
-### Admin Commands
-- Clear messages
-- User warnings
-- **AI Template Manager**: Generate and manage server roles/channels with AI
-  - Generate custom templates from natural language descriptions
-  - Safely apply templates with automatic backups
-  - Revert to previous configurations
-  - See [AI_TEMPLATE_MANAGER_GUIDE.md](AI_TEMPLATE_MANAGER_GUIDE.md) for details
-- Kick/ban users
-- Announcement system
+### Music
+High-quality music playback directly in voice channels.
+- `!join`: Summon Jule to your voice channel.
+- `!leave`: Disconnect the bot.
+- `!play <query|url>`: Search for or play a song/URL.
+- `!pause`: Pause current playback.
+- `!resume`: Resume playback.
+- `!skip`: Skip the current song.
+- `!queue`: Show the current music queue.
+- `!clearqueue`: Remove all songs from the queue.
+- `!nowplaying`: Show details about the current song.
+- `!shuffle`: Shuffle the queue.
+- `!loop`: Toggle song looping.
+- `!musicstats`: View your personal music listening stats.
+- `!musicleaderboard`: View the server's top listeners.
 
-## Setup
+### AI & Knowledge
+Powered by Google Gemini to answer questions and generate ideas.
+- `!ask <question>`: Ask the AI any question.
+- `!explain <topic>`: Get a simple explanation of a topic.
+- `!wiki <query>`: Search Wikipedia for a summary.
+- `!topicstarter [theme]`: Generate conversation starters.
+- `!compare <item1> vs <item2>`: Compare two things.
+- `!summarize <topic>`: Get a concise summary of a subject.
+- `!debate <topic>`: Generate arguments for and against a topic.
+- `!brainstorm <topic>`: Generate creative ideas.
+- `!howto <task>`: Get a step-by-step guide.
+- `!quiz [topic]`: Generate a multiple-choice quiz question.
+- `!translate <language> <text>`: Translate text to another language.
+
+### Community
+Tools for engagement and member recognition.
+- `!points [@user]`: Check community points.
+- `!leaderboard`: View the top active members.
+- `!birthday <month> <day>`: Set your birthday (e.g., `!birthday 5 20`).
+- `!birthdays`: Check for upcoming birthdays.
+
+### Utilities
+Helpful tools for information and scheduling.
+- `!poll <question> <option1> <option2> ...`: Create a poll with reactions.
+- `!remind <minutes> <message>`: Set a reminder for yourself.
+- `!serverinfo`: Display server statistics.
+- `!userinfo [@user]`: Display detailed user information.
+- `!avatar [@user]`: View a user's avatar in full size.
+
+### Administration
+Advanced tools for server management and configuration. *Requires Admin permissions.*
+- `!announce <message>`: Send a formal announcement embed.
+- `!clear <amount>`: Bulk delete messages.
+- `!setintrochannel [#channel]`: Set the channel for auto-role assignment on introductions.
+- `!getintrochannel`: Check which channel is currently set for intros.
+- `!testrole <message>`: Test the AI role assignment logic without saving.
+- `!syncroles [file]`: Sync server roles from a YAML configuration file.
+- `!syncchannels [file]`: Sync server channels from a YAML configuration file.
+- `!reloadroles`: Reload the role configuration mapping.
+
+#### Template Manager
+AI-powered system to generate and apply server layouts.
+- `!genroles <description>`: Generate a roles structure using AI.
+- `!genchannels <description>`: Generate a channel layout using AI.
+- `!applyroles <file> confirm`: Apply a generated roles template.
+- `!applychannels <file> confirm`: Apply a generated channel template.
+- `!listtemplates`: List all available YAML templates.
+- `!listbackups`: List backups of previous configurations.
+- `!reverttemplate <backup> confirm`: Restore a previous configuration.
+- `!activetemplate`: Check currently active configuration files.
+
+## Getting Started
 
 ### Prerequisites
-- Python 3.8 or higher
-- Discord Bot Token
-- Google Gemini API Key (for AI commands)
+- Python 3.8 or higher, preferably 3.10+
+- A Discord Bot Token
+- A Google Gemini API Key
 
 ### Installation
 
 1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd Jule
-   ```
+   Download the source code to your local machine.
 
-2. **Create virtual environment**
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Configure environment variables**
-   
-   Create a `.env` file in the root directory:
+2. **Environment Configuration**
+   Create a `.env` file in the `src/` directory with the following credentials:
    ```env
    DISCORD_TOKEN=your_discord_bot_token_here
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
+   Note: Verify that `src/constants.py` matches your desired configuration for channel IDs and role IDs.
 
-5. **Configure channels and roles**
-   
-   Edit `src/config/channels.json` and `src/config/roles.json` with your server's IDs.
+3. **Data Directories**
+   Ensure the following directories exist (they will be created automatically by the start script):
+   - `src/data/`: For the SQLite database.
+   - `src/config/`: For JSON/YAML configurations.
 
-6. **Run the bot**
-   ```bash
-   python src/bot.py
-   ```
+### Running the Bot
 
-   Or use the start script:
-   ```bash
-   ./start.sh
-   ```
+The project includes a startup script that handles virtual environment creation and dependency installation automatically.
 
-## Getting API Keys
-
-### Discord Bot Token
-1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
-2. Create a new application
-3. Go to "Bot" section and create a bot
-4. Copy the token
-5. Enable all Privileged Gateway Intents
-
-### Google Gemini API Key
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create a new API key
-3. Copy the key
-
-## Configuration
-
-### Channel IDs
-Edit `src/constants.py` to set:
-- `GREET_CHANNEL_ID`: Channel for welcome messages
-- `MUSIC_CHANNEL_ID`: Channel for music commands (optional)
-
-### Role IDs
-Edit `src/constants.py` to set:
-- `DEFAULT_ROLE_ID`: Role assigned to new members
-
-### Channel Mappings
-Edit `src/config/channels.json`:
-```json
-{
-  "intro": 1234567890,
-  "music": 1234567890,
-  "general": 1234567890
-}
-```
-
-### Role Mappings
-Edit `src/config/roles.json` for AI-powered role assignment:
-```json
-{
-  "developer": 1234567890,
-  "gamer": 1234567890,
-  "artist": 1234567890
-}
-```
-
-## Command Reference
-
-### Quick Command List
-
-#### AI Commands
-```
-!ask <question>          - Ask the AI anything
-!explain <topic>         - Get simple explanations
-!wiki <query>            - Search Wikipedia
-!topicstarter [theme]    - Generate conversation starters
-!brainstorm <topic>      - Generate creative ideas
-!quiz [topic]            - Interactive quiz questions
-!aifact [category]       - AI-generated interesting facts
-!howto <task>            - Step-by-step guides
-!compare <A> vs <B>      - Compare two things
-!debate <topic>          - Generate debate points
-!summarize <topic>       - Get concise summaries
-!translate <lang> <text> - Translate text
-!dailychallenge [cat]    - Get daily challenges
-!clearcontext            - Clear AI conversation history
-```
-
-#### Music Commands
-```
-!join                    - Join your voice channel
-!leave                   - Leave voice channel
-!music <query>           - Search and play music
-!pause                   - Pause playback
-!resume                  - Resume playback
-!skip                    - Skip current song
-!queue                   - Show music queue
-!clearqueue              - Clear the queue
-!loop                    - Toggle loop mode
-!nowplaying              - Show current song
-!shuffle                 - Shuffle queue
-!musicstats [@user]      - Show music statistics
-!musicleaderboard        - Top music listeners
-```
-
-#### Fun Commands
-```
-!hello                   - Greet Jule
-!joke                    - Get a random joke
-!dadjoke                 - Get a dad joke
-!fact                    - Random fact
-!8ball <question>        - Magic 8-ball
-!compliment [@user]      - Give a compliment
-```
-
-#### Community Commands
-```
-!profile [@user]         - View user profile
-!leaderboard             - Top users by points
-!setbio <bio>            - Set your bio
-!birthday <MM/DD>        - Set your birthday
-```
-
-#### Utility Commands
-```
-!poll "question" opt1 opt2...  - Create a poll
-!remind <minutes> <msg>         - Set a reminder
-!serverinfo                     - Server information
-!avatar [@user]                 - View avatar
-```
-
-#### Admin Commands (Requires Permissions)
-```
-!clear <amount>          - Clear messages
-!warn @user <reason>     - Warn a user
-!kick @user <reason>     - Kick a user
-!ban @user <reason>      - Ban a user
-!announce <message>      - Send announcement
-```
-
-## Features in Detail
-
-### AI-Powered Role Assignment
-When users post in the introduction channel, the bot:
-1. Analyzes their introduction using Gemini AI
-2. Suggests appropriate roles based on interests
-3. Automatically assigns matched roles
-4. Sends a welcome message with assigned roles
-
-### Music System
-- YouTube search with multiple results
-- Smart queue management
-- Listening statistics tracking
-- Leaderboards for top listeners
-- Auto-disconnect after 5 minutes of inactivity
-
-### Points System
-- Earn points by chatting (1 point per 10 messages)
-- View your rank on the leaderboard
-- Track message count and activity
-
-### Birthday System
-- Set your birthday
-- Automatic birthday notifications
-- View upcoming birthdays
-
-## Development
-
-### Project Structure
-```
-Jule/
-├── src/
-│   ├── bot.py              # Main bot entry point
-│   ├── constants.py        # Configuration constants
-│   ├── services.py         # Core services
-│   ├── utils.py            # Utility functions
-│   ├── cogs/               # Command modules
-│   │   ├── admin_commands.py
-│   │   ├── ai_commands.py        
-│   │   ├── community_commands.py
-│   │   ├── fun_commands.py
-│   │   ├── game_commands.py
-│   │   ├── music_commands.py
-│   │   └── utility_commands.py
-│   ├── model/              # Database models
-│   │   ├── model.py
-│   │   ├── services.py
-│   │   └── role_assigner.py
-│   └── config/             # Configuration files
-│       ├── channels.json
-│       └── roles.json
-├── data/
-│   └── jule.db            # SQLite database
-├── dashboard/             # Web dashboard (optional)
-└── requirements.txt       # Python dependencies
-```
-
-### Adding New Commands
-
-1. Create or edit a cog file in `src/cogs/`
-2. Use the `@commands.command()` decorator
-3. Add the cog to `bot.py` in the `load_extensions()` function
-
-Example:
-```python
-@commands.command(name="example", help="An example command")
-async def example(self, ctx: commands.Context):
-    await ctx.send("This is an example!")
-```
-
-## Dashboard (Optional)
-
-The bot includes a web dashboard for statistics:
-
+**Run the startup script:**
 ```bash
-python dashboard.py
+./start.sh
 ```
 
-Access at `http://localhost:5000`
+This script will:
+1. Create a Python virtual environment (`.venv`) if one does not exist.
+2. Install all required dependencies from `requirements.txt`.
+3. Initialize the database.
+4. Launch the Discord Bot.
+5. Launch the Web Dashboard on port 8080 (default).
 
-## Testing
+## Output Logs
+- **Bot Logs**: `bot.log`
+- **Dashboard Logs**: `dashboard.log`
 
-Use the provided test script for AI commands:
-```bash
-./test_ai_commands.sh
-```
+## Project Structure
+- `src/bot.py`: Main entry point for the Discord bot.
+- `dashboard.py`: Entry point for the Flask web dashboard.
+- `src/cogs/`: Directory containing bot extensions (commands and listeners).
+- `src/model/`: Database models and service layers.
+- `src/constants.py`: Central configuration file.
 
-Or test individual commands in Discord:
-```
-!ask Hello! Can you introduce yourself?
-!wiki Discord bot
-!topicstarter
-```
-
-## Troubleshooting
-
-### Bot not responding
-- Check if bot is online
-- Verify command prefix is `!`
-- Ensure bot has necessary permissions
-
-### AI commands not working
-- Verify `GEMINI_API_KEY` is set in `.env`
-- Check API key validity
-- Ensure internet connectivity
-
-### Music not playing
-- Verify voice channel permissions
-- Check FFmpeg installation
-- Ensure yt-dlp is up to date
-
-### Database errors
-- Delete `data/jule.db` to reset (will lose data)
-- Check file permissions
-- Verify SQLite is installed
-
-## Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## Credits
-
-- Discord.py library
-- Google Gemini AI
-- yt-dlp for music extraction
-- Wikipedia API
-
+## License
+This project is open for private and educational use.

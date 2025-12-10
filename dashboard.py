@@ -307,6 +307,109 @@ def activity_chart():
         session.close()
 
 
+@app.route('/api/games/stats')
+def games_stats():
+    """Get game statistics"""
+    session = db.get_session()
+    try:
+        from src.model.model import UserGameStats, GameStats
+        from sqlalchemy import func
+
+        # Get game type statistics
+        game_types = session.query(
+            UserGameStats.game_type,
+            func.sum(UserGameStats.total_played).label('total_played'),
+            func.sum(UserGameStats.total_wins).label('total_wins'),
+            func.sum(UserGameStats.total_losses).label('total_losses'),
+            func.max(UserGameStats.best_win_streak).label('best_streak')
+        ).group_by(UserGameStats.game_type).all()
+
+        # Total games across all types
+        total_games = session.query(func.count(GameStats.id)).scalar() or 0
+
+        games_data = []
+        for game in game_types:
+            win_rate = (game.total_wins / game.total_played * 100) if game.total_played > 0 else 0
+            games_data.append({
+                'game_type': game.game_type,
+                'total_played': game.total_played,
+                'total_wins': game.total_wins,
+                'total_losses': game.total_losses,
+                'win_rate': round(win_rate, 1),
+                'best_streak': game.best_streak or 0
+            })
+
+        return jsonify({
+            'total_games': total_games,
+            'games': games_data
+        })
+    finally:
+        session.close()
+
+
+@app.route('/api/music/top')
+def music_top():
+    """Get top played songs"""
+    limit = request.args.get('limit', 10, type=int)
+
+    session = db.get_session()
+    try:
+        from src.model.model import MusicStats
+        from sqlalchemy import func
+
+        # Get most played songs
+        top_songs = session.query(
+            MusicStats.song_title,
+            MusicStats.artist,
+            func.count(MusicStats.id).label('play_count')
+        ).group_by(
+            MusicStats.song_title,
+            MusicStats.artist
+        ).order_by(
+            func.count(MusicStats.id).desc()
+        ).limit(limit).all()
+
+        # Get total songs played
+        total_songs = session.query(func.count(MusicStats.id)).scalar() or 0
+
+        return jsonify({
+            'total_songs': total_songs,
+            'top_songs': [
+                {
+                    'title': song.song_title,
+                    'artist': song.artist or 'Unknown',
+                    'plays': song.play_count
+                }
+                for song in top_songs
+            ]
+        })
+    finally:
+        session.close()
+
+
+@app.route('/api/trivia/stats')
+def trivia_stats():
+    """Get trivia statistics"""
+    session = db.get_session()
+    try:
+        from src.model.model import TriviaStats
+        from sqlalchemy import func
+
+        # Get aggregate trivia stats
+        total_questions = session.query(func.sum(TriviaStats.total_questions)).scalar() or 0
+        correct_answers = session.query(func.sum(TriviaStats.correct_answers)).scalar() or 0
+
+        accuracy = (correct_answers / total_questions * 100) if total_questions > 0 else 0
+
+        return jsonify({
+            'total_questions': total_questions,
+            'correct_answers': correct_answers,
+            'accuracy': round(accuracy, 1)
+        })
+    finally:
+        session.close()
+
+
 if __name__ == '__main__':
     # Ensure dashboard folders exist
     os.makedirs('dashboard/templates', exist_ok=True)
@@ -315,6 +418,7 @@ if __name__ == '__main__':
     
     print("🚀 Starting Jule Dashboard on http://localhost:8080")
     print("📊 Dashboard ready!")
-    
+    print("✨ Modern design with real-time analytics")
+
     app.run(host='0.0.0.0', port=8080, debug=True)
 

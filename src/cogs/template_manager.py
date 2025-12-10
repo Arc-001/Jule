@@ -39,10 +39,49 @@ class TemplateManager(commands.Cog):
             self.model = None
         else:
             genai.configure(api_key=GEMINI_API_KEY)
-            self.model = genai.GenerativeModel('gemini-2.5-pro')
+            self.model = genai.GenerativeModel('gemini-2.5-flash')
 
         # Protected files that should never be overwritten
         self.protected_files = ['roles.yaml', 'channels.yaml']
+
+        # Files to track currently active templates
+        self.active_roles_template_file = self.config_dir / ".active_roles_template"
+        self.active_channels_template_file = self.config_dir / ".active_channels_template"
+
+    def _get_active_template(self, template_type: str) -> Optional[str]:
+        """Get the currently active template name for roles or channels"""
+        if template_type == 'roles':
+            tracking_file = self.active_roles_template_file
+        elif template_type == 'channels':
+            tracking_file = self.active_channels_template_file
+        else:
+            return None
+
+        if tracking_file.exists():
+            try:
+                with open(tracking_file, 'r') as f:
+                    template_name = f.read().strip()
+                    # Verify the template file still exists
+                    if (self.config_dir / template_name).exists():
+                        return template_name
+            except:
+                pass
+        return None
+
+    def _set_active_template(self, template_type: str, template_name: str):
+        """Set the currently active template name for roles or channels"""
+        if template_type == 'roles':
+            tracking_file = self.active_roles_template_file
+        elif template_type == 'channels':
+            tracking_file = self.active_channels_template_file
+        else:
+            return
+
+        try:
+            with open(tracking_file, 'w') as f:
+                f.write(template_name)
+        except Exception as e:
+            print(f"Warning: Could not update active template tracking: {e}")
 
     def _create_backup(self, file_path: Path) -> Optional[Path]:
         """Create a timestamped backup of a file"""
@@ -347,23 +386,63 @@ Output ONLY the YAML content, no explanations or markdown code blocks."""
                 embed.set_footer(text="Template saved in config folder")
 
                 await status_msg.delete()
-                await ctx.send(embed=embed)
+
+                # Try to send the embed, catch if it's too long
+                try:
+                    await ctx.send(embed=embed)
+                except discord.HTTPException as e:
+                    # Embed was too long, send simplified message
+                    if "length" in str(e).lower():
+                        await ctx.send(
+                            f"✅ Template `{template_name}` generated successfully!\n"
+                            f"**{total_roles} roles** across **{total_categories} categories**\n\n"
+                            f"Use `!listtemplates` to view and `!applyroles {template_name}` to apply it."
+                        )
+                    else:
+                        raise  # Re-raise if it's a different HTTP error
 
         except discord.HTTPException as e:
             # Discord message too long or other HTTP error
             if status_msg:
-                await status_msg.delete()
+                try:
+                    await status_msg.delete()
+                except:
+                    pass
 
             if template_name:
                 # Template was saved but message failed
-                await ctx.send(f"✅ Template saved as `{template_name}` but preview was too long.\n"
-                              f"Use `!listtemplates` to see it and `!applyroles {template_name}` to apply it.")
+                try:
+                    await ctx.send(
+                        f"✅ Template saved as `{template_name}`\n"
+                        f"Use `!listtemplates` to see it and `!applyroles {template_name}` to apply it."
+                    )
+                except:
+                    pass  # If even this fails, the global handler will catch it
             else:
-                await ctx.send(f"❌ Error sending response: {str(e)}")
+                # Truncate error message if needed
+                error_msg = str(e)
+                if len(error_msg) > 1500:
+                    error_msg = error_msg[:1500] + "..."
+                try:
+                    await ctx.send(f"❌ Error: {error_msg}")
+                except:
+                    await ctx.send("❌ An error occurred while sending the response.")
         except Exception as e:
             if status_msg:
-                await status_msg.delete()
-            await ctx.send(f"❌ Error generating roles template: {str(e)}")
+                try:
+                    await status_msg.delete()
+                except:
+                    pass
+
+            # Truncate error message to avoid exceeding Discord's limit
+            error_msg = str(e)
+            if len(error_msg) > 1500:
+                error_msg = error_msg[:1500] + "..."
+
+            try:
+                await ctx.send(f"❌ Error generating roles template: {error_msg}")
+            except discord.HTTPException:
+                await ctx.send("❌ An error occurred. Please check the bot logs.")
 
     @commands.command(name="genchannels", help="[Admin] Generate a new channels template using AI")
     @commands.has_permissions(administrator=True)
@@ -440,23 +519,63 @@ Output ONLY the YAML content, no explanations or markdown code blocks."""
                 embed.set_footer(text="Template saved in config folder")
 
                 await status_msg.delete()
-                await ctx.send(embed=embed)
+
+                # Try to send the embed, catch if it's too long
+                try:
+                    await ctx.send(embed=embed)
+                except discord.HTTPException as e:
+                    # Embed was too long, send simplified message
+                    if "length" in str(e).lower():
+                        await ctx.send(
+                            f"✅ Template `{template_name}` generated successfully!\n"
+                            f"**{total_channels} channels** across **{total_categories} categories**\n\n"
+                            f"Use `!listtemplates` to view and `!applychannels {template_name}` to apply it."
+                        )
+                    else:
+                        raise  # Re-raise if it's a different HTTP error
 
         except discord.HTTPException as e:
             # Discord message too long or other HTTP error
             if status_msg:
-                await status_msg.delete()
+                try:
+                    await status_msg.delete()
+                except:
+                    pass
 
             if template_name:
                 # Template was saved but message failed
-                await ctx.send(f"✅ Template saved as `{template_name}` but preview was too long.\n"
-                              f"Use `!listtemplates` to see it and `!applychannels {template_name}` to apply it.")
+                try:
+                    await ctx.send(
+                        f"✅ Template saved as `{template_name}`\n"
+                        f"Use `!listtemplates` to see it and `!applychannels {template_name}` to apply it."
+                    )
+                except:
+                    pass  # If even this fails, the global handler will catch it
             else:
-                await ctx.send(f"❌ Error sending response: {str(e)}")
+                # Truncate error message if needed
+                error_msg = str(e)
+                if len(error_msg) > 1500:
+                    error_msg = error_msg[:1500] + "..."
+                try:
+                    await ctx.send(f"❌ Error: {error_msg}")
+                except:
+                    await ctx.send("❌ An error occurred while sending the response.")
         except Exception as e:
             if status_msg:
-                await status_msg.delete()
-            await ctx.send(f"❌ Error generating channels template: {str(e)}")
+                try:
+                    await status_msg.delete()
+                except:
+                    pass
+
+            # Truncate error message to avoid exceeding Discord's limit
+            error_msg = str(e)
+            if len(error_msg) > 1500:
+                error_msg = error_msg[:1500] + "..."
+
+            try:
+                await ctx.send(f"❌ Error generating channels template: {error_msg}")
+            except discord.HTTPException:
+                await ctx.send("❌ An error occurred. Please check the bot logs.")
 
     @commands.command(name="applyroles", help="[Admin] Apply a roles template (removes old, applies new)")
     @commands.has_permissions(administrator=True)
@@ -508,16 +627,8 @@ Output ONLY the YAML content, no explanations or markdown code blocks."""
             async with ctx.typing():
                 status_msg = await ctx.send("🔄 Starting template application...")
 
-                # Find current active template (last modified non-protected yaml)
-                current_template = None
-                roles_json = self.config_dir / "roles.json"
-
-                if roles_json.exists():
-                    # Try to find which template was last used
-                    yaml_files = [f for f in self.config_dir.glob("roles_*.yaml")
-                                  if f.name not in self.protected_files]
-                    if yaml_files:
-                        current_template = max(yaml_files, key=lambda p: p.stat().st_mtime).name
+                # Get the currently active template from tracking file
+                current_template = self._get_active_template('roles')
 
                 # Step 1: Backup current template if exists
                 if current_template:
@@ -529,6 +640,19 @@ Output ONLY the YAML content, no explanations or markdown code blocks."""
                     # Step 2: Remove old roles
                     await status_msg.edit(content=f"🗑️ Removing roles from: {current_template}...")
                     remove_stats = await self._remove_managed_roles(ctx, current_template)
+
+                    # Show deletion stats if any
+                    if remove_stats['deleted'] > 0 or remove_stats['errors']:
+                        status_parts = []
+                        if remove_stats['deleted'] > 0:
+                            status_parts.append(f"Deleted {remove_stats['deleted']} roles")
+                        if remove_stats['errors']:
+                            status_parts.append(f"{len(remove_stats['errors'])} errors")
+                        await status_msg.edit(content=f"🗑️ Cleanup: {', '.join(status_parts)}")
+
+                    await asyncio.sleep(1)
+                else:
+                    await status_msg.edit(content="ℹ️ No previous template to remove...")
                     await asyncio.sleep(1)
 
                 # Step 3: Apply new template using existing syncroles command
@@ -538,6 +662,10 @@ Output ONLY the YAML content, no explanations or markdown code blocks."""
                 syncroles_cog = self.bot.get_cog("AdminCommands")
                 if syncroles_cog:
                     await syncroles_cog.syncroles(ctx, template_file)
+
+                    # Update active template tracking
+                    self._set_active_template('roles', template_file)
+
                     await status_msg.delete()
                 else:
                     await status_msg.edit(content="❌ Could not find AdminCommands cog to sync roles")
@@ -595,15 +723,8 @@ Output ONLY the YAML content, no explanations or markdown code blocks."""
             async with ctx.typing():
                 status_msg = await ctx.send("🔄 Starting template application...")
 
-                # Find current active template
-                current_template = None
-                channels_json = self.config_dir / "current_channels.json"
-
-                if channels_json.exists():
-                    yaml_files = [f for f in self.config_dir.glob("channels_*.yaml")
-                                  if f.name not in self.protected_files]
-                    if yaml_files:
-                        current_template = max(yaml_files, key=lambda p: p.stat().st_mtime).name
+                # Get the currently active template from tracking file
+                current_template = self._get_active_template('channels')
 
                 # Step 1: Backup current template if exists
                 if current_template:
@@ -615,6 +736,21 @@ Output ONLY the YAML content, no explanations or markdown code blocks."""
                     # Step 2: Remove old channels
                     await status_msg.edit(content=f"🗑️ Removing channels from: {current_template}...")
                     remove_stats = await self._remove_managed_channels(ctx, current_template)
+
+                    # Show deletion stats if any
+                    if remove_stats['deleted'] > 0 or remove_stats['categories_deleted'] > 0 or remove_stats['errors']:
+                        status_parts = []
+                        if remove_stats['deleted'] > 0:
+                            status_parts.append(f"Deleted {remove_stats['deleted']} channels")
+                        if remove_stats['categories_deleted'] > 0:
+                            status_parts.append(f"{remove_stats['categories_deleted']} categories")
+                        if remove_stats['errors']:
+                            status_parts.append(f"{len(remove_stats['errors'])} errors")
+                        await status_msg.edit(content=f"🗑️ Cleanup: {', '.join(status_parts)}")
+
+                    await asyncio.sleep(1)
+                else:
+                    await status_msg.edit(content="ℹ️ No previous template to remove...")
                     await asyncio.sleep(1)
 
                 # Step 3: Apply new template using existing syncchannels command
@@ -624,6 +760,10 @@ Output ONLY the YAML content, no explanations or markdown code blocks."""
                 syncchannels_cog = self.bot.get_cog("AdminCommands")
                 if syncchannels_cog:
                     await syncchannels_cog.syncchannels(ctx, template_file)
+
+                    # Update active template tracking
+                    self._set_active_template('channels', template_file)
+
                     await status_msg.delete()
                 else:
                     await status_msg.edit(content="❌ Could not find AdminCommands cog to sync channels")
@@ -789,6 +929,68 @@ Output ONLY the YAML content, no explanations or markdown code blocks."""
 
         embed.set_footer(text="🔒 = Protected (default) template | Use !applyroles or !applychannels to apply")
         await ctx.send(embed=embed)
+
+    @commands.command(name="activetemplate", help="[Admin] Check or set the currently active template")
+    @commands.has_permissions(administrator=True)
+    async def active_template(self, ctx: commands.Context, template_type: str = None, template_file: str = None):
+        """
+        Check or set the currently active template for roles or channels.
+
+        Usage:
+        - !activetemplate - Check both active templates
+        - !activetemplate roles - Check active roles template
+        - !activetemplate channels <template.yaml> - Set active channels template
+
+        Example: !activetemplate channels channels_generated_20250110_143022.yaml
+        """
+        if not template_type:
+            # Show both active templates
+            roles_template = self._get_active_template('roles')
+            channels_template = self._get_active_template('channels')
+
+            embed = discord.Embed(
+                title="📌 Active Templates",
+                description="Currently tracked active templates",
+                color=discord.Color.blue()
+            )
+
+            embed.add_field(
+                name="🎭 Roles Template",
+                value=f"`{roles_template}`" if roles_template else "None set",
+                inline=False
+            )
+
+            embed.add_field(
+                name="🌌 Channels Template",
+                value=f"`{channels_template}`" if channels_template else "None set",
+                inline=False
+            )
+
+            embed.set_footer(text="These templates will be removed when applying a new template")
+            await ctx.send(embed=embed)
+            return
+
+        if template_type not in ['roles', 'channels']:
+            await ctx.send("❌ Invalid type. Use `roles` or `channels`.")
+            return
+
+        if not template_file:
+            # Just show the active template for this type
+            active = self._get_active_template(template_type)
+            if active:
+                await ctx.send(f"✅ Active {template_type} template: `{active}`")
+            else:
+                await ctx.send(f"ℹ️ No active {template_type} template is set.")
+            return
+
+        # Set the active template
+        template_path = self.config_dir / template_file
+        if not template_path.exists():
+            await ctx.send(f"❌ Template file `{template_file}` not found in config directory!")
+            return
+
+        self._set_active_template(template_type, template_file)
+        await ctx.send(f"✅ Set active {template_type} template to: `{template_file}`")
 
 
 async def setup(bot: commands.Bot):

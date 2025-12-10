@@ -386,7 +386,17 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError):
     elif isinstance(error, commands.CommandNotFound):
         await ctx.send("❌ Command not found! Use `!help` to see available commands.")
     else:
-        await ctx.send(f"❌ An error occurred: {str(error)}")
+        # Truncate error message to avoid exceeding Discord's 2000 char limit
+        error_msg = str(error)
+        if len(error_msg) > 1800:
+            error_msg = error_msg[:1800] + "... (truncated)"
+
+        try:
+            await ctx.send(f"❌ An error occurred: {error_msg}")
+        except discord.HTTPException:
+            # If even the truncated message is too long, send a generic error
+            await ctx.send("❌ An error occurred. Please check the bot logs for details.")
+
         print(f"Error: {error}")
 
 

@@ -1,0 +1,52 @@
+categories:
+  🚀 Welcome & Launchpad:
+    channels:
+    - name: 👋 welcome-bay
+      type: text
+      description: Come aboard, traveler! New members start here.
+    - name: 📜 star-map
+      type: text
+      description: Essential server information, rules, and FAQs for your journey.
+    - name: 📣 mission-control
+      type: text
+      description: Official server updates and announcements from command.
+  ✨ Cosmic Conversations:
+    channels:
+    - name: 🌌 galaxy-lounge
+      type: text
+      description: Our main cosmic hangout spot for general chats.
+    - name: 💬 asteroid-chatter
+      type: text
+      description: Casual talks, random thoughts, and meme sharing.
+    - name: 🎤 orbital-rendezvous
+      type: voice
+      description: Voice chat with fellow space explorers and friends.
+    - name: 🎶 celestial-jams
+      type: voice
+      description: Listen to cosmic tunes together or share your favorite spacey playlists.
+  🔭 Deep Space Discoveries:
+    channels:
+    - name: 🌟 astronomy-corner
+      type: text
+      description: Discuss the wonders of the universe, latest discoveries, and theories.
+    - name: 🖼️ cosmic-gallery
+      type: text
+      description: Share your space-themed art, photography, and creative projects.
+    - name: 🎮 gaming-nebula
+      type: text
+      description: Talk about games, find fellow players, and discuss gaming news.
+    - name: 🛰️ tech-talk
+      type: text
+      description: Discuss space technology, science, future innovations, and more.
+  🪐 Quiet Quarters:
+    channels:
+    - name: 🧘‍♀️ zen-planet
+      type: text
+      description: A peaceful text space for calm reflection, journaling, or quiet
+        thoughts.
+    - name: 🎧 starlight-study
+      type: voice
+      description: A quiet focus room for work, study, or silent presence.
+    - name: 🌌 ambient-noise
+      type: voice
+      description: Chill out with space background sounds, lo-fi beats, or just relax.

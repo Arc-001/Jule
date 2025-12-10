@@ -1,0 +1,63 @@
+categories:
+  🪐 Welcome Comet:
+    channels:
+    - name: starport-arrival
+      type: text
+      description: Welcome new travelers! Begin your cosmic journey here.
+    - name: celestial-rules
+      type: text
+      description: The cosmic guidelines of our galaxy. Read before exploring.
+    - name: galactic-directory
+      type: text
+      description: A guide to our star systems and server information.
+  💬 Cosmic Lounge:
+    channels:
+    - name: general-chat
+      type: text
+      description: Random musings and interstellar banter.
+    - name: deep-space-thoughts
+      type: text
+      description: For deeper discussions and ponderings under the stars.
+    - name: starlight-serenade
+      type: voice
+      description: A place to chat casually under the stars.
+  🎨 Nebula Canvas:
+    channels:
+    - name: art-exhibition
+      type: text
+      description: Showcase your cosmic creations and designs.
+    - name: creative-nebula
+      type: text
+      description: Share ideas, inspiration, and collaborate on projects.
+    - name: soundwave-stream
+      type: voice
+      description: Tune in for music, podcasts, or casual audio sharing.
+  🎮 Launchpad Gaming:
+    channels:
+    - name: mission-control
+      type: text
+      description: Coordinate your gaming expeditions and finds.
+    - name: asteroid-arena
+      type: text
+      description: Discuss various games, challenges, and high scores.
+    - name: co-op-hangar
+      type: voice
+      description: Team up for your next multiplayer mission.
+    - name: free-roam-drift
+      type: voice
+      description: Casual gaming voice chat for relaxed play.
+  ⚙️ Starship Operations:
+    channels:
+    - name: star-gazers-log
+      type: text
+      description: Important announcements and server updates from mission control.
+    - name: bug-reports
+      type: text
+      description: Report anomalies and glitches in our star system.
+    - name: suggestions-portal
+      type: text
+      description: Propose new cosmic features and ideas for the server.
+standalone:
+- name: afk-orbit
+  type: voice
+  description: For when you need to drift off into space for a bit.
