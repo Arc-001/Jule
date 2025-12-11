@@ -68,7 +68,7 @@ class CommunityCommands(commands.Cog):
             await ctx.send(error_message)
             return
 
-        self.birthday_service.add_birthday(ctx.author.id, month, day)
+        self.birthday_service.set_birthday(ctx.author.id, month, day)
         birthday_str = format_birthday(month, day)
         await ctx.send(f"🎂 Birthday set to {birthday_str}! I'll wish you on your special day!")
 
