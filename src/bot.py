@@ -10,7 +10,7 @@ from discord.ext import commands, tasks
 
 from constants import (
     DISCORD_TOKEN, DATABASE_PATH, CHANNELS_CONFIG_PATH, ROLES_CONFIG_PATH,
-    GREET_CHANNEL_ID, DEFAULT_ROLE_ID, SPAM_THRESHOLD, SPAM_TIMEFRAME,
+    GREET_CHANNEL_ID, SPAM_THRESHOLD, SPAM_TIMEFRAME,
     GREETINGS, RANDOM_REACTIONS, RANDOM_REACTION_CHANCE, MIN_INTRO_LENGTH
 )
 from model.model import Database
@@ -193,15 +193,24 @@ async def on_member_join(member: discord.Member):
 
     await greet_channel.send(embed=embed)
 
-    # Assign default role
-    default_role = member.guild.get_role(DEFAULT_ROLE_ID)
-    if default_role:
-        try:
-            await member.add_roles(default_role)
-        except discord.Forbidden:
-            print(f"Error: Bot lacks permission to assign default role")
-        except Exception as e:
-            print(f"Error assigning default role: {e}")
+    # Assign default role from server settings
+    server_settings = db.get_server_settings(member.guild.id)
+    default_role_id = server_settings.get('default_role_id')
+
+    if default_role_id:
+        default_role = member.guild.get_role(default_role_id)
+        if default_role:
+            try:
+                await member.add_roles(default_role)
+                print(f"✅ Assigned default role '{default_role.name}' to {member}")
+            except discord.Forbidden:
+                print(f"Error: Bot lacks permission to assign default role '{default_role.name}'")
+            except Exception as e:
+                print(f"Error assigning default role: {e}")
+        else:
+            print(f"Warning: Default role ID {default_role_id} not found in server")
+    else:
+        print(f"No default role configured for server {member.guild.id}")
 
 
 

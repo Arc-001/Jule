@@ -644,6 +644,133 @@ class AdminCommands(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Unexpected error during channel sync: {str(e)}")
 
+    @commands.command(name="setdefaultrole", help="[Admin] Set the default role for new members! Usage: !setdefaultrole @role")
+    @commands.has_permissions(administrator=True)
+    async def setdefaultrole(self, ctx: commands.Context, role: discord.Role = None):
+        """
+        Set the role that will be automatically assigned to new members when they join.
+
+        Usage:
+        - !setdefaultrole @Member - Set the default role
+        - !setdefaultrole - Clear the default role (disable auto assignment)
+        """
+        try:
+            if role:
+                # Validate that the bot can assign this role
+                if role.position >= ctx.guild.me.top_role.position:
+                    await ctx.send(f"❌ I cannot assign the role {role.mention} because it's higher than or equal to my highest role!")
+                    return
+
+                if role.managed:
+                    await ctx.send(f"❌ The role {role.mention} is managed by an integration and cannot be assigned manually!")
+                    return
+
+                # Set the default role
+                self.bot.db.update_server_settings(
+                    guild_id=ctx.guild.id,
+                    default_role_id=role.id
+                )
+
+                embed = discord.Embed(
+                    title="✅ Default Role Set",
+                    description=f"New members will automatically receive {role.mention}",
+                    color=discord.Color.green()
+                )
+                embed.add_field(
+                    name="Role Details",
+                    value=(
+                        f"**Name:** {role.name}\n"
+                        f"**ID:** {role.id}\n"
+                        f"**Color:** {role.color}\n"
+                        f"**Members:** {len(role.members)}"
+                    ),
+                    inline=False
+                )
+                embed.set_footer(text="This role will be assigned when new members join the server")
+                await ctx.send(embed=embed)
+
+            else:
+                # Clear the default role
+                self.bot.db.update_server_settings(
+                    guild_id=ctx.guild.id,
+                    default_role_id=None
+                )
+
+                embed = discord.Embed(
+                    title="🔕 Default Role Cleared",
+                    description="New members will no longer receive a role automatically.",
+                    color=discord.Color.orange()
+                )
+                embed.add_field(
+                    name="To re-enable",
+                    value="Use `!setdefaultrole @role` to set a new default role",
+                    inline=False
+                )
+                await ctx.send(embed=embed)
+
+        except Exception as e:
+            await ctx.send(f"❌ Error setting default role: {str(e)}")
+
+    @commands.command(name="getdefaultrole", help="[Admin] Check which role is set as the default for new members")
+    @commands.has_permissions(administrator=True)
+    async def getdefaultrole(self, ctx: commands.Context):
+        """Check the current default role setting"""
+        try:
+            server_settings = self.bot.db.get_server_settings(ctx.guild.id)
+            default_role_id = server_settings.get('default_role_id')
+
+            if default_role_id:
+                role = ctx.guild.get_role(default_role_id)
+                if role:
+                    embed = discord.Embed(
+                        title="📍 Current Default Role",
+                        description=f"New members will automatically receive {role.mention}",
+                        color=discord.Color.blue()
+                    )
+                    embed.add_field(
+                        name="Role Details",
+                        value=(
+                            f"**Name:** {role.name}\n"
+                            f"**ID:** {role.id}\n"
+                            f"**Color:** {role.color}\n"
+                            f"**Members:** {len(role.members)}"
+                        ),
+                        inline=False
+                    )
+                    embed.add_field(
+                        name="Status",
+                        value="✅ Active",
+                        inline=True
+                    )
+                else:
+                    embed = discord.Embed(
+                        title="⚠️ Invalid Default Role",
+                        description=f"Role ID {default_role_id} is set but the role no longer exists.",
+                        color=discord.Color.orange()
+                    )
+                    embed.add_field(
+                        name="Action Required",
+                        value="Use `!setdefaultrole @role` to set a valid role",
+                        inline=False
+                    )
+            else:
+                embed = discord.Embed(
+                    title="📍 No Default Role Set",
+                    description="New members will not receive a role automatically.",
+                    color=discord.Color.grey()
+                )
+                embed.add_field(
+                    name="To enable",
+                    value="Use `!setdefaultrole @role` to set a default role",
+                    inline=False
+                )
+
+            embed.set_footer(text="Default roles are assigned when users join the server")
+            await ctx.send(embed=embed)
+
+        except Exception as e:
+            await ctx.send(f"❌ Error getting default role: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
     """Add the cog to the bot"""

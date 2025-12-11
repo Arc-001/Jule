@@ -140,6 +140,8 @@ class CustomHelpCommand(commands.Cog):
                 value=(
                     "`!announce <msg>` - Announcement\n"
                     "`!clear <num>` - Clear messages\n"
+                    "`!setdefaultrole [@role]` - Set/clear default role\n"
+                    "`!getdefaultrole` - View default role\n"
                     "`!setintrochannel [#ch]` - Set/clear intro channel\n"
                     "`!getintrochannel` - View intro channel\n"
                     "`!reloadroles` - Reload roles\n"
