@@ -176,6 +176,115 @@ class AdminCommands(commands.Cog):
         except Exception as e:
             await ctx.send(f"❌ Error getting intro channel: {str(e)}")
 
+    @commands.command(name="setgreetchannel", help="[Admin] Set the channel for welcome messages! Usage: !setgreetchannel #channel")
+    @commands.has_permissions(administrator=True)
+    async def setgreetchannel(self, ctx: commands.Context, channel: discord.TextChannel = None):
+        """
+        Set the channel where welcome messages and birthday wishes are sent.
+
+        Usage:
+        - !setgreetchannel #welcome - Set the greet channel
+        - !setgreetchannel - Clear the greet channel (disable welcome messages)
+        """
+        try:
+            if channel:
+                # Set the welcome channel
+                self.bot.db.update_server_settings(
+                    guild_id=ctx.guild.id,
+                    welcome_channel_id=channel.id
+                )
+
+                embed = discord.Embed(
+                    title="✅ Greet Channel Set",
+                    description=f"Welcome messages and birthday wishes will now be sent to {channel.mention}",
+                    color=discord.Color.green()
+                )
+                embed.add_field(
+                    name="Features Enabled",
+                    value=(
+                        "• Welcome messages for new members\n"
+                        "• Daily birthday announcements\n"
+                        "• Community celebrations"
+                    ),
+                    inline=False
+                )
+                await ctx.send(embed=embed)
+            else:
+                # Clear the welcome channel
+                self.bot.db.update_server_settings(
+                    guild_id=ctx.guild.id,
+                    welcome_channel_id=None
+                )
+
+                embed = discord.Embed(
+                    title="🔕 Greet Channel Cleared",
+                    description="Welcome messages and birthday announcements are now disabled.",
+                    color=discord.Color.orange()
+                )
+                embed.add_field(
+                    name="To re-enable",
+                    value="Use `!setgreetchannel #channel` to set a new greet channel",
+                    inline=False
+                )
+                await ctx.send(embed=embed)
+
+        except Exception as e:
+            await ctx.send(f"❌ Error setting greet channel: {str(e)}")
+
+    @commands.command(name="getgreetchannel", help="[Admin] Check which channel is set for welcome messages")
+    @commands.has_permissions(administrator=True)
+    async def getgreetchannel(self, ctx: commands.Context):
+        """Check the current greet channel setting"""
+        try:
+            server_settings = self.bot.db.get_server_settings(ctx.guild.id)
+            welcome_channel_id = server_settings.get('welcome_channel_id')
+
+            if welcome_channel_id:
+                channel = ctx.guild.get_channel(welcome_channel_id)
+                if channel:
+                    embed = discord.Embed(
+                        title="📍 Current Greet Channel",
+                        description=f"Welcome messages are sent to {channel.mention}",
+                        color=discord.Color.blue()
+                    )
+                    embed.add_field(
+                        name="Channel ID",
+                        value=str(welcome_channel_id),
+                        inline=True
+                    )
+                    embed.add_field(
+                        name="Status",
+                        value="✅ Active",
+                        inline=True
+                    )
+                else:
+                    embed = discord.Embed(
+                        title="⚠️ Invalid Greet Channel",
+                        description=f"Channel ID {welcome_channel_id} is set but channel not found.",
+                        color=discord.Color.orange()
+                    )
+                    embed.add_field(
+                        name="Action Required",
+                        value="Use `!setgreetchannel #channel` to set a valid channel",
+                        inline=False
+                    )
+            else:
+                embed = discord.Embed(
+                    title="📍 No Greet Channel Set",
+                    description="Welcome messages are currently disabled.",
+                    color=discord.Color.grey()
+                )
+                embed.add_field(
+                    name="To enable",
+                    value="Use `!setgreetchannel #channel` to set a greet channel",
+                    inline=False
+                )
+
+            await ctx.send(embed=embed)
+
+        except Exception as e:
+            await ctx.send(f"❌ Error getting greet channel: {str(e)}")
+
     @commands.command(name="testrole", help="[Admin] Test role assignment for a message! Usage: !testrole <message>")
     @commands.has_permissions(administrator=True)
     async def testrole(self, ctx: commands.Context, *, intro_text: str):

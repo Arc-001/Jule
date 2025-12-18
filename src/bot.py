@@ -171,30 +171,32 @@ async def on_member_join(member: discord.Member):
         avatar_url=str(member.avatar.url) if member.avatar else None
     )
 
+    # Get server settings
+    server_settings = db.get_server_settings(member.guild.id)
+    welcome_channel_id = server_settings.get('welcome_channel_id') or GREET_CHANNEL_ID
+
     # Get greet channel
-    greet_channel = member.guild.get_channel(GREET_CHANNEL_ID)
+    greet_channel = member.guild.get_channel(welcome_channel_id)
     if not greet_channel:
-        print(f"Warning: Greet channel {GREET_CHANNEL_ID} not found")
-        return
+        print(f"Warning: Greet channel {welcome_channel_id} not found")
+    else:
+        # Send welcome message
+        embed = discord.Embed(
+            title="🌟 Welcome to Small Cozy Nook! 🌟",
+            description=(
+                f"Hello, {member.mention}! It is amazing to see you here.\n\n"
+                "🎮 Use `!help` to see what I can do!\n"
+                "💬 Explore the channels - minimal by design (definitely not because we're lazy XDD)\n"
+                "🎉 Have fun and make yourself at home!\n"
+            ),
+            color=discord.Color.blurple()
+        )
+        embed.set_thumbnail(url=get_avatar_url(member))
+        embed.set_footer(text="Feel free to ask questions or introduce yourself!")
 
-    # Send welcome message
-    embed = discord.Embed(
-        title="🌟 Welcome to Small Cozy Nook! 🌟",
-        description=(
-            f"Hello, {member.mention}! It is amazing to see you here.\n\n"
-            "🎮 Use `!help` to see what I can do!\n"
-            "💬 Explore the channels - minimal by design (definitely not because we're lazy XDD)\n"
-            "🎉 Have fun and make yourself at home!\n"
-        ),
-        color=discord.Color.blurple()
-    )
-    embed.set_thumbnail(url=get_avatar_url(member))
-    embed.set_footer(text="Feel free to ask questions or introduce yourself!")
-
-    await greet_channel.send(embed=embed)
+        await greet_channel.send(embed=embed)
 
     # Assign default role from server settings
-    server_settings = db.get_server_settings(member.guild.id)
     default_role_id = server_settings.get('default_role_id')
 
     if default_role_id:
@@ -330,7 +332,11 @@ async def check_birthdays():
 
     # Get first available guild to send messages
     for guild in bot.guilds:
-        greet_channel = guild.get_channel(GREET_CHANNEL_ID)
+        # Get server settings
+        server_settings = db.get_server_settings(guild.id)
+        welcome_channel_id = server_settings.get('welcome_channel_id') or GREET_CHANNEL_ID
+        
+        greet_channel = guild.get_channel(welcome_channel_id)
         if greet_channel:
             for user_id in birthday_users:
                 member = guild.get_member(user_id)

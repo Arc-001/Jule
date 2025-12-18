@@ -142,6 +142,8 @@ class CustomHelpCommand(commands.Cog):
                     "`!clear <num>` - Clear messages\n"
                     "`!setdefaultrole [@role]` - Set/clear default role\n"
                     "`!getdefaultrole` - View default role\n"
+                    "`!setgreetchannel [#ch]` - Set/clear greet channel\n"
+                    "`!getgreetchannel` - View greet channel\n"
                     "`!setintrochannel [#ch]` - Set/clear intro channel\n"
                     "`!getintrochannel` - View intro channel\n"
                     "`!reloadroles` - Reload roles\n"
