@@ -4,18 +4,16 @@ Handles entertainment and casual interaction commands
 """
 
 import random
-import discord
-from discord.ext import commands
 from typing import Optional
 
-import sys
-import os
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import discord
+from discord.ext import commands
 
 from constants import (
-    GREETINGS, ENCOURAGEMENTS, RANDOM_FACTS, COMPLIMENTS,
-    EIGHT_BALL_RESPONSES
+    COMPLIMENTS,
+    EIGHT_BALL_RESPONSES,
+    ENCOURAGEMENTS,
+    RANDOM_FACTS,
 )
 
 

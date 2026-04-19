@@ -3,16 +3,12 @@ Community commands cog for Jule bot
 Handles points, birthdays, and community engagement
 """
 
-import discord
-from discord.ext import commands
 from typing import Optional
 
-import sys
-import os
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import discord
+from discord.ext import commands
 
-from model.services import PointsService, BirthdayService
+from model.services import BirthdayService, PointsService
 from utils import format_birthday, validate_birthday
 
 

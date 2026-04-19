@@ -5,18 +5,17 @@ Handles moderation and administration commands
 
 import asyncio
 import json
-import yaml
 from pathlib import Path
+
 import discord
+import yaml
 from discord.ext import commands
 
-import sys
-import os
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from constants import MIN_CLEAR_MESSAGES, MAX_CLEAR_MESSAGES
+from constants import MAX_CLEAR_MESSAGES, MIN_CLEAR_MESSAGES
+from logger import get_logger
 from model.role_assigner import RoleAssigner
+
+log = get_logger(__name__)
 
 
 class AdminCommands(commands.Cog):

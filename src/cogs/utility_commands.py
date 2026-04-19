@@ -3,21 +3,20 @@ Utility commands cog for Jule bot
 Handles polls, reminders, and information commands
 """
 
-import discord
-from discord.ext import commands
 from typing import Optional
 
-import sys
-import os
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import discord
+from discord.ext import commands
 
 from constants import (
-    MIN_POLL_OPTIONS, MAX_POLL_OPTIONS, POLL_REACTIONS,
-    MIN_REMINDER_MINUTES, MAX_REMINDER_MINUTES
+    MAX_POLL_OPTIONS,
+    MAX_REMINDER_MINUTES,
+    MIN_POLL_OPTIONS,
+    MIN_REMINDER_MINUTES,
+    POLL_REACTIONS,
 )
-from model.services import ReminderService, BirthdayService, PointsService
-from utils import get_avatar_url, format_birthday
+from model.services import BirthdayService, PointsService, ReminderService
+from utils import format_birthday, get_avatar_url
 
 
 class UtilityCommands(commands.Cog):

@@ -1,77 +1,56 @@
-"""
-Gemini-based role assigner service
-Analyzes user introductions and assigns appropriate roles
-"""
+"""Gemini-powered role suggestion service."""
 
-import google.generativeai as genai
+from __future__ import annotations
+
 import json
 import os
-from typing import List, Dict
+from typing import Dict, List, Tuple
+
+import google.generativeai as genai
 from dotenv import load_dotenv
 
+from logger import get_logger
+
 load_dotenv()
+log = get_logger(__name__)
+
+_MODEL_NAME = "gemini-2.5-flash"
 
 
 class RoleAssigner:
-    """Service for analyzing intros and assigning roles using Gemini"""
+    """Analyze user introductions and map them to configured Discord role IDs."""
 
-    def __init__(self, roles_config_path: str = "config/roles.json"):
-        """
-        Initialize the role assigner with Gemini API
-
-        Args:
-            roles_config_path: Path to the roles configuration JSON file
-        """
-        # Configure Gemini API
+    def __init__(self, roles_config_path: str = "config/roles.json") -> None:
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise ValueError("GEMINI_API_KEY not found in environment variables")
 
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-flash')
+        self.model = genai.GenerativeModel(_MODEL_NAME)
 
-        # Load role mappings
         self.roles_config_path = roles_config_path
-        self.role_mappings = self.ls_load_role_mappings()
+        self.role_mappings: Dict[str, int] = self._load_role_mappings()
 
-    def ls_load_role_mappings(self) -> Dict[str, int]:
-        """Load role name to role ID mappings from JSON file"""
+    # ------------------------------------------------------------ mappings IO
+
+    def _load_role_mappings(self) -> Dict[str, int]:
         try:
-            with open(self.roles_config_path, 'r') as f:
+            with open(self.roles_config_path, "r", encoding="utf-8") as f:
                 return json.load(f)
         except FileNotFoundError:
-            print(f"Warning: Role config file not found at {self.roles_config_path}")
+            log.warning("Role config file not found at %s", self.roles_config_path)
             return {}
-        except json.JSONDecodeError:
-            print(f"Warning: Invalid JSON in role config file {self.roles_config_path}")
+        except json.JSONDecodeError as e:
+            log.warning("Invalid JSON in role config file %s: %s", self.roles_config_path, e)
             return {}
 
-    def reload_role_mappings(self):
-        """Reload role mappings from the configuration file"""
-        self.role_mappings = self.ls_load_role_mappings()
+    def reload_role_mappings(self) -> None:
+        self.role_mappings = self._load_role_mappings()
 
-    async def analyze_intro(self, intro_text: str) -> List[str]:
-        """
-        Analyze an introduction and suggest appropriate roles
+    # ----------------------------------------------------------- Gemini prompt
 
-        Args:
-            intro_text: The user's introduction message
-
-        Returns:
-            List of role names that should be assigned
-        """
-        if not intro_text or not intro_text.strip():
-            return []
-
-        # Get available roles
-        available_roles = list(self.role_mappings.keys())
-        if not available_roles:
-            print("Warning: No roles configured")
-            return []
-
-        # Create prompt for Gemini
-        prompt = f"""
-You are a helpful assistant that analyzes user introductions on a Discord server and suggests appropriate roles.
+    def _build_prompt(self, intro_text: str, available_roles: List[str]) -> str:
+        return f"""You are a helpful assistant that analyzes user introductions on a Discord server and suggests appropriate roles.
 
 Available roles:
 {', '.join(available_roles)}
@@ -92,77 +71,62 @@ Example format: ["developer", "gamer", "tech enthusiast"]
 
 Your response:"""
 
+    async def analyze_intro(self, intro_text: str) -> List[str]:
+        """Ask Gemini which configured roles fit the intro. Returns validated role names."""
+        if not intro_text or not intro_text.strip():
+            return []
+
+        available_roles = list(self.role_mappings.keys())
+        if not available_roles:
+            log.warning("No roles configured")
+            return []
+
+        prompt = self._build_prompt(intro_text, available_roles)
+
         try:
-            # Generate response from Gemini
             response = self.model.generate_content(prompt)
-
-            if not response or not response.text:
-                print("Warning: Empty response from Gemini")
-                return []
-
-            # Parse the response
-            response_text = response.text.strip()
-
-            # Try to extract JSON array from response
-            # Handle cases where the model might include extra text
-            start_idx = response_text.find('[')
-            end_idx = response_text.rfind(']')
-
-            if start_idx == -1 or end_idx == -1:
-                print(f"Warning: No JSON array found in response: {response_text}")
-                return []
-
-            json_str = response_text[start_idx:end_idx + 1]
-            suggested_roles = json.loads(json_str)
-
-            # Validate and filter roles
-            valid_roles = []
-            for role in suggested_roles:
-                role_lower = role.lower().strip()
-                if role_lower in available_roles:
-                    valid_roles.append(role_lower)
-                else:
-                    print(f"Warning: Suggested role '{role}' not found in available roles")
-
-            return valid_roles
-
-        except json.JSONDecodeError as e:
-            print(f"Error parsing Gemini response as JSON: {e}")
-            print(f"Response was: {response_text if 'response_text' in locals() else 'N/A'}")
-            return []
         except Exception as e:
-            print(f"Error analyzing intro with Gemini: {e}")
+            log.error("Gemini request failed: %s", e)
             return []
+
+        if not response or not response.text:
+            log.warning("Empty response from Gemini")
+            return []
+
+        response_text = response.text.strip()
+        start = response_text.find("[")
+        end = response_text.rfind("]")
+        if start == -1 or end == -1:
+            log.warning("No JSON array found in response: %s", response_text)
+            return []
+
+        try:
+            suggested = json.loads(response_text[start:end + 1])
+        except json.JSONDecodeError as e:
+            log.error("Error parsing Gemini response as JSON: %s | response=%s", e, response_text)
+            return []
+
+        valid: List[str] = []
+        for role in suggested:
+            lowered = str(role).lower().strip()
+            if lowered in available_roles:
+                valid.append(lowered)
+            else:
+                log.warning("Suggested role '%s' not in available roles", role)
+        return valid
+
+    # ---------------------------------------------------------- public helpers
 
     def get_role_ids(self, role_names: List[str]) -> List[int]:
-        """
-        Convert role names to role IDs
-
-        Args:
-            role_names: List of role names
-
-        Returns:
-            List of role IDs
-        """
-        role_ids = []
-        for role_name in role_names:
-            role_id = self.role_mappings.get(role_name.lower())
+        ids: List[int] = []
+        for name in role_names:
+            role_id = self.role_mappings.get(name.lower())
             if role_id:
-                role_ids.append(role_id)
+                ids.append(role_id)
             else:
-                print(f"Warning: No role ID found for role name '{role_name}'")
-        return role_ids
+                log.warning("No role ID found for role name '%s'", name)
+        return ids
 
-    async def assign_roles_from_intro(self, intro_text: str) -> tuple[List[str], List[int]]:
-        """
-        Analyze intro and return both role names and IDs
-
-        Args:
-            intro_text: The user's introduction message
-
-        Returns:
-            Tuple of (role_names, role_ids)
-        """
+    async def assign_roles_from_intro(self, intro_text: str) -> Tuple[List[str], List[int]]:
         role_names = await self.analyze_intro(intro_text)
-        role_ids = self.get_role_ids(role_names)
-        return role_names, role_ids
+        return role_names, self.get_role_ids(role_names)

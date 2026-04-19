@@ -3,19 +3,18 @@ AI-powered commands cog for Jule bot
 Handles Gemini LLM interactions, Wikipedia searches, and intelligent responses
 """
 
-import discord
-from discord.ext import commands
-from typing import Optional
 import asyncio
-import aiohttp
+from typing import Optional
 
-import sys
-import os
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import aiohttp
+import discord
+import google.generativeai as genai
+from discord.ext import commands
 
 from constants import GEMINI_API_KEY
-import google.generativeai as genai
+from logger import get_logger
+
+log = get_logger(__name__)
 
 
 class AICommands(commands.Cog):
@@ -26,7 +25,7 @@ class AICommands(commands.Cog):
 
         # Configure Gemini API
         if not GEMINI_API_KEY:
-            print("Warning: GEMINI_API_KEY not found. AI commands will be limited.")
+            log.warning("GEMINI_API_KEY not found. AI commands will be limited.")
             self.model = None
         else:
             genai.configure(api_key=GEMINI_API_KEY)
@@ -75,7 +74,7 @@ class AICommands(commands.Cog):
             return response.text if response else "I couldn't generate a response."
 
         except Exception as e:
-            print(f"Error getting Gemini response: {e}")
+            log.error("Error getting Gemini response: %s", e)
             return f"❌ Error: {str(e)}"
 
     async def search_wikipedia(self, query: str, sentences: int = 3) -> dict:
@@ -130,7 +129,7 @@ class AICommands(commands.Cog):
                     }
 
         except Exception as e:
-            print(f"Error searching Wikipedia: {e}")
+            log.error("Error searching Wikipedia: %s", e)
             return {"error": str(e)}
 
     @commands.command(name="explain", aliases=["eli5"], help="Ask the AI to explain something! Usage: !explain <topic>")

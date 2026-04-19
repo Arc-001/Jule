@@ -3,22 +3,24 @@ AI-Based Template Generator and Manager for Discord Server
 Generates, manages, and syncs role/channel templates using AI
 """
 
-import discord
-from discord.ext import commands
-import yaml
 import asyncio
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Tuple, Optional
 import shutil
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import discord
+import yaml
+from discord.ext import commands
+
+from logger import get_logger
+
+log = get_logger(__name__)
 
 try:
-    from constants import GEMINI_API_KEY
     import google.generativeai as genai
+
+    from constants import GEMINI_API_KEY
 except ImportError:
     GEMINI_API_KEY = None
     genai = None
@@ -35,7 +37,7 @@ class TemplateManager(commands.Cog):
 
         # Configure Gemini API
         if not GEMINI_API_KEY or not genai:
-            print("Warning: GEMINI_API_KEY not found or genai not available. Template generation will be limited.")
+            log.warning("GEMINI_API_KEY not found or genai not available. Template generation limited.")
             self.model = None
         else:
             genai.configure(api_key=GEMINI_API_KEY)
@@ -81,7 +83,7 @@ class TemplateManager(commands.Cog):
             with open(tracking_file, 'w') as f:
                 f.write(template_name)
         except Exception as e:
-            print(f"Warning: Could not update active template tracking: {e}")
+            log.warning("Could not update active template tracking: %s", e)
 
     def _create_backup(self, file_path: Path) -> Optional[Path]:
         """Create a timestamped backup of a file"""
