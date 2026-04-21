@@ -3,18 +3,17 @@ Music commands cog for Jule bot
 Handles voice channel operations, music playback, queue management, and listening stats
 """
 
-import discord
-from discord.ext import commands
-from typing import Optional, List
 import asyncio
-import yt_dlp
+from typing import List, Optional
 
-import sys
-import os
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import discord
+import yt_dlp
+from discord.ext import commands
 
 from constants import MAX_QUEUE_SIZE, MAX_SEARCH_RESULTS, MUSIC_INACTIVITY_TIMEOUT
+from logger import get_logger
+
+log = get_logger(__name__)
 
 
 # YouTube DL options for audio extraction
@@ -200,8 +199,8 @@ class MusicCommands(commands.Cog):
         except Exception as e:
             error_msg = str(e)
             if 'Sign in to confirm' in error_msg or 'bot' in error_msg.lower():
-                print(f"YouTube bot detection triggered. Try using cookies or wait a moment.")
-                print(f"Full error: {error_msg}")
+                log.warning("YouTube bot detection triggered. Try using cookies or wait a moment.")
+                log.debug("Full error: %s", error_msg)
                 # Try with a simpler search
                 try:
                     # Create a new ytdl instance with different options
@@ -218,9 +217,9 @@ class MusicCommands(commands.Cog):
                         valid_entries = [e for e in data['entries'] if e is not None]
                         return valid_entries
                 except Exception as e2:
-                    print(f"Fallback search also failed: {e2}")
+                    log.error("Fallback search also failed: %s", e2)
             else:
-                print(f"Error searching YouTube: {error_msg}")
+                log.error("Error searching YouTube: %s", error_msg)
             return []
 
     async def get_song_info(self, url_or_query: str) -> Optional[dict]:
@@ -241,7 +240,7 @@ class MusicCommands(commands.Cog):
         except Exception as e:
             error_msg = str(e)
             if 'Sign in to confirm' in error_msg or 'bot' in error_msg.lower():
-                print(f"YouTube bot detection: {error_msg}")
+                log.warning("YouTube bot detection: %s", error_msg)
                 # Try with extract_flat to get basic info
                 try:
                     simple_ytdl = yt_dlp.YoutubeDL({
@@ -260,9 +259,9 @@ class MusicCommands(commands.Cog):
                         return data['entries'][0] if data['entries'] else None
                     return data
                 except Exception as e2:
-                    print(f"Fallback extraction also failed: {e2}")
+                    log.error("Fallback extraction also failed: %s", e2)
             else:
-                print(f"Error getting song info: {error_msg}")
+                log.error("Error getting song info: %s", error_msg)
             return None
 
     async def play_next(self, guild_id: int, text_channel: discord.TextChannel):
@@ -291,7 +290,7 @@ class MusicCommands(commands.Cog):
             
             def after_playing(error):
                 if error:
-                    print(f"Player error: {error}")
+                    log.error("Player error: %s", error)
                 # Play next song
                 coro = self.play_next(guild_id, text_channel)
                 asyncio.run_coroutine_threadsafe(coro, self.bot.loop)

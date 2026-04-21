@@ -1,7 +1,7 @@
 // Chart Global Config
 Chart.defaults.color = '#a1a1aa';
 Chart.defaults.font.family = "'Inter', sans-serif";
-Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
+Chart.defaults.borderColor = 'rgba(255, 45, 149, 0.08)';
 
 let activityChartInstance = null;
 let gameChartInstance = null;
@@ -32,13 +32,13 @@ async function updateActivityChart() {
                     datasets: [{
                         label: 'Messages',
                         data: values,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderColor: '#ff2d95',
+                        backgroundColor: 'rgba(255, 45, 149, 0.12)',
                         borderWidth: 3,
                         tension: 0.4,
                         fill: true,
-                        pointBackgroundColor: '#6366f1',
-                        pointBorderColor: '#fff',
+                        pointBackgroundColor: '#ff2d95',
+                        pointBorderColor: '#0a0a0c',
                         pointBorderWidth: 2,
                         pointRadius: 4
                     }]
@@ -85,11 +85,11 @@ function updateGamesChart(gamesData) {
                 datasets: [{
                     data: played,
                     backgroundColor: [
-                        '#6366f1', // Indigo
-                        '#ec4899', // Pink
-                        '#10b981', // Emerald
-                        '#f59e0b', // Amber
-                        '#8b5cf6'  // Violet
+                        '#ff2d95', // Neon pink
+                        '#39ff14', // Neon green
+                        '#ff6ec7', // Pink soft
+                        '#7eff9a', // Green soft
+                        '#ff4d6d'  // Danger red
                     ],
                     borderWidth: 0,
                     hoverOffset: 10

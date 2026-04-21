@@ -3,29 +3,32 @@ Game commands cog for Jule bot
 Handles interactive games
 """
 
-import random
 import asyncio
-import discord
-from discord.ext import commands
-from typing import List, Dict, Optional
+import json
+import random
+import re
 from datetime import datetime
+from typing import Dict, List, Optional
 
-import sys
-import os
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import discord
+import google.generativeai as genai
+from discord.ext import commands
 
 from constants import (
-    RPS_CHOICES, RPS_EMOJI_MAP, RPS_WIN_POINTS,
-    GUESS_MIN, GUESS_MAX, GUESS_ATTEMPTS, GUESS_TIMEOUT, GUESS_WIN_POINTS,
-    GEMINI_API_KEY
+    GEMINI_API_KEY,
+    GUESS_ATTEMPTS,
+    GUESS_MAX,
+    GUESS_MIN,
+    GUESS_TIMEOUT,
+    GUESS_WIN_POINTS,
+    RPS_CHOICES,
+    RPS_EMOJI_MAP,
+    RPS_WIN_POINTS,
 )
+from logger import get_logger
 from model.services import PointsService
 
-# Add these imports (keep concise)
-import json
-import re
-import google.generativeai as genai
+log = get_logger(__name__)
 
 
 class TriviaSession:
@@ -90,7 +93,7 @@ class GameCommands(commands.Cog):
                 genai.configure(api_key=GEMINI_API_KEY)
                 self.gemini_model = genai.GenerativeModel('gemini-2.5-flash-lite')
             except Exception as e:
-                print(f"Warning: Failed to configure Gemini model: {e}")
+                log.warning("Failed to configure Gemini model: %s", e)
                 self.gemini_model = None
         else:
             self.gemini_model = None
@@ -542,7 +545,7 @@ Good luck! Question 1 coming up...
             try:
                 trivia_data = await self._generate_trivia_with_gemini(session.difficulty, session.genre)
             except Exception as e:
-                print(f"Gemini trivia generation failed: {e}")
+                log.warning("Gemini trivia generation failed: %s", e)
                 trivia_data = None
 
         # Fallback to static questions if Gemini fails
